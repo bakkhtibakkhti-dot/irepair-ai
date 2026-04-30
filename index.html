@@ -105,32 +105,33 @@
         else return `🤔 **الوضع الذكي:** لم أتعلم هذه المشكلة بعد.\n📱 ${device} | ⚙️ ${system}\n📝 ${q}\n\n💡 يمكنك تعليمي الإجابة عبر زر "تدريب الذكاء".\n\n🔧 **نصيحة:** أعد تشغيل الجهاز وجرب البحث عن رمز الخطأ.`;
     }
 
-    // ========== Gemini API حقيقي مع CORS Proxy مجاني ==========
+    // ========== Gemini API حقيقي بدون CORS Proxy (مباشر) ==========
     async function callGeminiReal(question, apiKey, model = "gemini-1.5-flash") {
         const prompt = `أنت خبير صيانة إلكترونيات. قدم تشخيصًا دقيقًا وحلولاً عملية باللغة العربية للمشكلة التالية: ${question}. قدم خطوات مرتبة من الأسهل للأصعب، ونصائح إضافية إن أمكن. أجب بشكل مفيد ومختصر.`;
         const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
         const body = { contents: [{ parts: [{ text: prompt }] }], generationConfig: { temperature: 0.7, maxOutputTokens: 800 } };
-        // استخدام CORS Proxy مجاني للخوادم التي تمنع الطلبات المباشرة من المتصفح
-        const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
+
         try {
-            // أولاً نحاول الاتصال مباشرة (قد ينجح على بعض الخوادم)
-            let response = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
-            if (!response.ok) throw new Error(`HTTP ${response.status}`);
-            let data = await response.json();
-            let text = data.candidates?.[0]?.content?.parts?.[0]?.text;
-            if (text) return { success: true, text };
-        } catch (e) {
-            // إذا فشل مباشرة، نستخدم الـ proxy
-            try {
-                const proxyResponse = await fetch(proxyUrl, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
-                if (!proxyResponse.ok) throw new Error(`Proxy HTTP ${proxyResponse.status}`);
-                const proxyData = await proxyResponse.json();
-                let proxyText = proxyData.candidates?.[0]?.content?.parts?.[0]?.text;
-                if (proxyText) return { success: true, text: proxyText };
-                else return { success: false, error: "Invalid response from Gemini via proxy" };
-            } catch (proxyError) {
-                return { success: false, error: "Direct and proxy both failed. Check API key or network." };
+            const response = await fetch(url, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(body)
+            });
+            const data = await response.json();
+
+            if (!response.ok) {
+                const errorMsg = data.error?.message || `HTTP ${response.status}`;
+                throw new Error(errorMsg);
             }
+
+            const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+            if (text) {
+                return { success: true, text };
+            } else {
+                throw new Error("الرد من Gemini غير مكتمل");
+            }
+        } catch (error) {
+            return { success: false, error: `فشل الاتصال: ${error.message}` };
         }
     }
 
@@ -202,7 +203,6 @@
             saveTrainings();
             alert("✅ تم تدريب الذكاء (للحالات التي تستخدم الوضع الذكي)!");
             tq.value=""; ta.value="";
-            // إذا كانت النتيجة معروضة حالياً وكان الوضع ذكياً نحدثها
             if(resultDiv.style.display==="block" && mode!=="real"){
                 let prob=textarea.value.trim();
                 if(prob) askAI(prob, device, system, "smart", "", model, resultDiv);
@@ -210,7 +210,7 @@
         };
     }
 
-    // ========== دوال التشخيص والفواتير والإعدادات (مبسطة للحفاظ على الطول) ==========
+    // ========== دوال التشخيص والفواتير والإعدادات ==========
     function renderDiagnostics(){
         let container=document.getElementById("mainContent");
         let selectedDev=appData.devices.find(d=>d.id===selectedDeviceId);
@@ -247,7 +247,6 @@
         document.querySelectorAll('.delLessonBtn').forEach(btn=>btn.addEventListener('click',(e)=>{ e.stopPropagation(); deleteLesson(btn.dataset.sys,parseInt(btn.dataset.idx)); }));
         document.querySelectorAll('.lesson-card').forEach(card=>card.addEventListener('click',(e)=>{ if(e.target.closest('.editLessonBtn')||e.target.closest('.delLessonBtn')) return; let sysId=card.dataset.sys, idx=parseInt(card.dataset.lessonidx); showLessonDetail(sysId,idx); }));
     }
-    // دوال CRUD > تم اختصارها لأنها مكررة وتعمل بكفاءة
     function getCurrentDevice(){ return appData.devices.find(d=>d.id===selectedDeviceId); }
     function openSystemModal(sysId){ let sys=sysId?getCurrentDevice().systems.find(s=>s.id===sysId):null; let isEdit=!!sys; let html=`<div class="modal"><div class="modal-content"><h3>${isEdit?t('edit'):t('addSystem')}</h3><input id="sysAr" placeholder="الاسم بالعربية" value="${isEdit?escapeHtml(sys.nameAr):''}"><input id="sysEn" placeholder="Name" value="${isEdit?escapeHtml(sys.nameEn):''}"><button id="saveSys" class="btn-primary">${t('save')}</button><button class="closeModalBtn btn-sm btn-outline">${t('close')}</button></div></div>`; document.body.insertAdjacentHTML('beforeend',html); let modal=document.querySelector('.modal:last-child'); modal.querySelector('.closeModalBtn').onclick=()=>modal.remove(); document.getElementById('saveSys').onclick=()=>{ let ar=document.getElementById('sysAr').value.trim(), en=document.getElementById('sysEn').value.trim(); if(ar&&en){ if(isEdit){ sys.nameAr=ar; sys.nameEn=en; } else { getCurrentDevice().systems.push({ id:genId(), nameAr:ar, nameEn:en, diagnosis:[], lessons:[] }); } saveFullData(); renderDiagnostics(); modal.remove(); } }; }
     function deleteSystem(id){ if(confirm(t('delete'))){ getCurrentDevice().systems=getCurrentDevice().systems.filter(s=>s.id!==id); openSystems.delete(id); saveFullData(); renderDiagnostics(); } }
@@ -264,7 +263,7 @@
     function sendWhatsApp(phone,name){ let msg=`${lang==='ar'?`مرحباً ${name}، جهازك جاهز في iRepair AI`:`Hello ${name}, your device is ready at iRepair AI`}`; window.open(`https://wa.me/${phone.replace(/[^0-9+]/g,'')}?text=${encodeURIComponent(msg)}`); }
     function printInvoice(id){ let inv=appData.invoices.find(i=>i.id===id); if(!inv) return; let win=window.open('','_blank'); win.document.write(`<html><head><title>Invoice</title><style>body{font-family:sans-serif;padding:20px}</style></head><body><div style="text-align:center"><h2>iRepair AI</h2><h3>${t('invoiceTitle')}</h3><hr><p><strong>${t('customerName')}:</strong> ${inv.customerName}<br><strong>${t('customerPhone')}:</strong> ${inv.customerPhone}<br><strong>${t('deviceModel')}:</strong> ${inv.deviceModel}<br><strong>${t('faultDesc')}:</strong> ${inv.faultDesc}<br><strong>${t('repairCost')}:</strong> ${inv.cost} SAR</p><hr><p>${new Date().toLocaleDateString()}</p></div></body></html>`); win.print(); win.close(); }
 
-    // ========== إعدادات التطبيق (تضيف خيارات الذكاء الاصطناعي الحقيقي) ==========
+    // ========== إعدادات التطبيق ==========
     function renderSettings(){
         let html=`<div class="card"><h3>${t('shopName')}</h3><input type="text" id="shopNameInput" value="iRepair AI" disabled><h3>${t('shopLogo')}</h3><input type="file" id="logoUpload" accept="image/*"><div id="logoPreview" style="margin:10px 0;">${appData.shop.logo?`<img src="${appData.shop.logo}" style="max-width:100px;border-radius:20px;">`:'<span class="text-accent">📷 لا يوجد شعار</span>'}</div><h3>${t('bgColor')}</h3><input type="color" id="bgColorPicker" value="${appData.shop.bgColor}"><h3>${t('splashBgColor')}</h3><input type="color" id="splashBgColorPicker" value="${appData.shop.splashBgColor}"><h3>${t('splashBgImage')}</h3><input type="file" id="splashBgUpload" accept="image/*"><div id="splashBgPreview" style="margin:10px 0;">${appData.shop.splashBgImage?`<img src="${appData.shop.splashBgImage}" style="max-width:100px;border-radius:20px;">`:'<span class="text-accent">🖼️ لا توجد صورة</span>'}</div><button id="removeSplashBg" class="btn-sm">🗑️ ${t('removeImage')}</button><hr><h3>${t('aiMode')}</h3><select id="aiModeSelect"><option value="smart" ${appData.shop.aiMode==='smart'?'selected':''}>${t('smartMode')}</option><option value="real" ${appData.shop.aiMode==='real'?'selected':''}>${t('realMode')}</option></select><div id="realSettings" style="${appData.shop.aiMode==='real'?'display:block':'display:none'}"><h3>${t('apiKey')}</h3><input type="password" id="geminiApiKey" placeholder="AIzaSy..." value="${appData.shop.geminiApiKey||''}"><h3>${t('model')}</h3><select id="geminiModel"><option value="gemini-1.5-flash">gemini-1.5-flash</option><option value="gemini-2.0-flash-exp" ${appData.shop.geminiModel==='gemini-2.0-flash-exp'?'selected':''}>gemini-2.0-flash-exp</option></select><button id="testApiBtn" class="btn-sm" style="margin-top:10px;">${t('testConnection')}</button><div class="info-box" style="margin-top:10px;"><i class="fas fa-info-circle"></i> ${lang==='ar'?'للحصول على مفتاح API مجاني: سجل في Google AI Studio (ai.google.dev) وأنشئ مفتاحاً.':'Get free API key from Google AI Studio.'}</div></div><button id="saveSettingsBtn" class="btn-primary" style="margin-top:20px;">${t('saveSettings')}</button></div><div class="card"><h3>${t('existingKnowledge')}</h3><div id="trainingsList" style="max-height:200px; overflow-y:auto;"></div><div class="info-box"><i class="fas fa-graduation-cap"></i> ${t('learnMore')}</div></div>`;
         document.getElementById("mainContent").innerHTML=html;
