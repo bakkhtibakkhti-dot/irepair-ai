@@ -2,593 +2,290 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>iRepair AI Pro | تشخيص ذكي</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>iRepair AI - ذكاء اصطناعي حقيقي (Gemini)</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { background: #000; font-family: 'Segoe UI', system-ui, sans-serif; color: #e2e8f0; overflow-x: hidden; }
-        body.rtl { direction: rtl; text-align: right; }
-        body.ltr { direction: ltr; text-align: left; }
-        .app { max-width: 1200px; width: 95%; margin: 20px auto; background: #0a0a0f; border-radius: 32px; box-shadow: 0 20px 40px rgba(0,0,0,0.6); overflow: hidden; display: flex; flex-direction: column; min-height: calc(100vh - 40px); }
-        .splash-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0a0a0f; z-index: 2000; display: flex; align-items: center; justify-content: center; transition: opacity 0.5s ease, visibility 0.5s ease; }
-        .splash-glass { background: rgba(15, 20, 30, 0.55); backdrop-filter: blur(16px); border-radius: 48px; padding: 48px 40px; text-align: center; border: 1px solid rgba(14, 165, 233, 0.4); width: 90%; max-width: 500px; }
-        .splash-logo { width: 110px; height: 110px; background: linear-gradient(135deg, #0ea5e9, #0284c7); border-radius: 35px; display: flex; align-items: center; justify-content: center; font-size: 3.5rem; margin: 0 auto 24px; overflow: hidden; }
-        .splash-logo img { width: 100%; height: 100%; object-fit: cover; }
-        .splash-shop-name { font-size: 2.5rem; font-weight: 800; margin-bottom: 30px; }
-        .splash-shop-name .i-letter { color: #fff; }
-        .splash-shop-name .rest { background: linear-gradient(135deg, #0ea5e9, #38bdf8); -webkit-background-clip: text; background-clip: text; color: transparent; }
-        .start-btn { background: linear-gradient(135deg, #0ea5e9, #38bdf8); border: none; padding: 16px 40px; border-radius: 60px; font-size: 1.3rem; font-weight: bold; color: #000; cursor: pointer; width: 80%; }
-        .start-btn:hover { transform: scale(1.02); }
-        .splash-screen.hide { opacity: 0; visibility: hidden; }
-        .header { background: rgba(5, 5, 8, 0.85); backdrop-filter: blur(8px); padding: 16px 28px; border-bottom: 1px solid #0ea5e9; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; }
-        .logo-area { display: flex; align-items: center; gap: 14px; }
-        .logo-img { width: 52px; height: 52px; background: linear-gradient(135deg, #0ea5e9, #0284c7); border-radius: 20px; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; color: #000; overflow: hidden; }
-        .logo-img img { width: 100%; height: 100%; object-fit: cover; }
-        .shop-name { font-size: 1.8rem; font-weight: 800; }
-        .shop-name .i-letter { color: #fff; }
-        .shop-name .rest { background: linear-gradient(135deg, #0ea5e9, #38bdf8); -webkit-background-clip: text; background-clip: text; color: transparent; }
-        .lang-btn { background: #1e293b; border: none; color: #0ea5e9; padding: 8px 20px; border-radius: 40px; font-weight: bold; cursor: pointer; display: flex; gap: 8px; transition: 0.2s; }
-        .lang-btn:hover { background: #0ea5e9; color: #000; }
-        .main-content { flex: 1; padding: 28px 28px 90px; overflow-y: auto; }
-        .bottom-nav { position: sticky; bottom: 0; background: rgba(10, 10, 15, 0.9); backdrop-filter: blur(12px); border-top: 1px solid #1e2a3a; display: flex; justify-content: space-around; padding: 12px 20px; z-index: 100; }
-        .nav-btn { background: none; border: none; display: flex; flex-direction: column; align-items: center; gap: 6px; color: #94a3b8; font-size: 0.85rem; cursor: pointer; flex: 1; max-width: 100px; padding: 6px 0; border-radius: 40px; }
-        .nav-btn i { font-size: 1.8rem; }
-        .nav-btn.active { color: #0ea5e9; }
-        .nav-btn:hover:not(.active) { background: rgba(14,165,233,0.1); }
-        .card { background: #111115; border-radius: 28px; padding: 24px; margin-bottom: 28px; border: 1px solid #1e2a3a; }
-        .devices-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-bottom: 28px; }
-        .device-item { background: #0f172a; border-radius: 24px; padding: 20px; display: flex; align-items: center; gap: 18px; cursor: pointer; border: 1px solid #1e2a3a; transition: 0.2s; }
-        .device-item:hover { background: #1e293b; transform: translateY(-2px); }
-        .device-item.active { border: 2px solid #0ea5e9; }
-        .device-icon { font-size: 2.3rem; width: 65px; height: 65px; background: #0ea5e920; border-radius: 35px; display: flex; align-items: center; justify-content: center; }
-        .device-title { font-size: 1.5rem; font-weight: bold; color: #0ea5e9; }
-        .device-count { font-size: 0.85rem; color: #94a3b8; }
-        .system-item { background: #0c0c10; border-radius: 24px; margin-bottom: 18px; border: 1px solid #1e2a3a; }
-        .system-header { display: flex; justify-content: space-between; align-items: center; padding: 18px 24px; cursor: pointer; flex-wrap: wrap; }
-        .system-header:hover { background: #16161f; }
-        .sys-name { font-size: 1.3rem; font-weight: bold; color: #38bdf8; display: flex; align-items: center; gap: 12px; }
-        .sys-actions button, .btn-sm { background: #1e293b; border: none; padding: 6px 14px; border-radius: 40px; color: white; font-size: 0.75rem; cursor: pointer; margin: 0 4px; transition: 0.2s; }
-        .sys-actions button:hover, .btn-sm:hover { background: #0ea5e9; color: #000; }
-        .system-body { padding: 0 24px 24px; border-top: 1px solid #1e2a3a; display: none; }
-        .system-body.open { display: block; }
-        .diagnosis-list { display: flex; flex-wrap: wrap; gap: 14px; margin: 18px 0; }
-        .diag-badge { background: #1e2a3a; padding: 8px 18px; border-radius: 40px; font-size: 0.9rem; display: inline-flex; align-items: center; gap: 10px; cursor: pointer; }
-        .diag-badge:hover { background: #0ea5e9; color: #000; }
-        .btn-primary { background: #0ea5e9; color: #000; font-weight: bold; cursor: pointer; transition: 0.2s; padding: 10px 20px; border-radius: 40px; border: none; }
-        .btn-primary:hover { background: #38bdf8; transform: scale(0.98); }
-        input, select, textarea { background: #1e293b; border: 1px solid #334155; padding: 12px 16px; border-radius: 28px; color: white; width: 100%; margin: 10px 0; }
-        .flex-between { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
-        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.92); backdrop-filter: blur(12px); display: flex; align-items: center; justify-content: center; z-index: 2000; }
-        .modal-content { background: #0f0f14; width: 90%; max-width: 650px; border-radius: 40px; padding: 28px; border: 1px solid #0ea5e9; max-height: 85vh; overflow-y: auto; }
-        .ai-response { background: #1a1e2a; border-radius: 24px; padding: 20px; margin-top: 15px; border-right: 4px solid #0ea5e9; white-space: pre-wrap; line-height: 1.6; }
-        .step-row { background: #1a1e2a; border-radius: 24px; padding: 14px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
-        .chev { transition: transform 0.2s; }
-        .rotate { transform: rotate(180deg); }
-        .text-accent { color: #0ea5e9; }
-        .info-box { background: #0ea5e920; border-radius: 20px; padding: 15px; margin: 15px 0; border: 1px solid #0ea5e9; font-size: 0.85rem; }
-        @media (max-width: 800px) {
-            .app { width: 100%; margin: 0; border-radius: 0; min-height: 100vh; }
-            .main-content { padding: 20px 16px 90px; }
-            .device-title { font-size: 1.2rem; }
-            .device-icon { width: 50px; height: 50px; font-size: 1.8rem; }
-            .splash-glass { padding: 32px 24px; }
-        }
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{background:#000;font-family:'Segoe UI',system-ui;color:#e2e8f0;overflow-x:hidden;}
+        body.rtl{direction:rtl;text-align:right;}
+        body.ltr{direction:ltr;text-align:left;}
+        .app{max-width:1200px;width:95%;margin:20px auto;background:rgba(8,10,18,0.85);backdrop-filter:blur(4px);border-radius:32px;box-shadow:0 20px 40px rgba(0,0,0,0.6);overflow:hidden;min-height:calc(100vh - 40px);border:1px solid rgba(14,165,233,0.2);}
+        .splash-screen{position:fixed;top:0;left:0;width:100%;height:100%;background:#05070c;z-index:2000;display:flex;align-items:center;justify-content:center;transition:0.5s;}
+        .splash-glass{background:rgba(10,15,25,0.7);backdrop-filter:blur(20px);border-radius:48px;padding:48px 40px;text-align:center;border:1px solid rgba(14,165,233,0.5);width:90%;max-width:500px;}
+        .splash-logo{width:110px;height:110px;background:linear-gradient(135deg,#0ea5e9,#0284c7);border-radius:35px;display:flex;margin:0 auto 24px;align-items:center;justify-content:center;font-size:3.5rem;}
+        .splash-shop-name{font-size:2.5rem;font-weight:800;margin-bottom:30px;}
+        .splash-shop-name .i-letter{color:#fff;}
+        .splash-shop-name .rest{background:linear-gradient(135deg,#0ea5e9,#38bdf8);-webkit-background-clip:text;background-clip:text;color:transparent;}
+        .start-btn{background:linear-gradient(135deg,#0ea5e9,#0284c7);border:none;padding:16px 40px;border-radius:60px;font-size:1.3rem;font-weight:bold;color:#000;cursor:pointer;width:80%;transition:0.2s;}
+        .start-btn:hover{transform:scale(1.02);}
+        .splash-screen.hide{opacity:0;visibility:hidden;pointer-events:none;}
+        .header{background:rgba(5,7,12,0.85);backdrop-filter:blur(12px);padding:16px 28px;border-bottom:1px solid #0ea5e9;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;}
+        .logo-area{display:flex;align-items:center;gap:14px;}
+        .logo-img{width:52px;height:52px;background:linear-gradient(135deg,#0ea5e9,#0284c7);border-radius:20px;display:flex;align-items:center;justify-content:center;font-size:1.8rem;color:#000;overflow:hidden;}
+        .shop-name{font-size:1.8rem;font-weight:800;}
+        .shop-name .i-letter{color:#fff;}
+        .shop-name .rest{background:linear-gradient(135deg,#0ea5e9,#38bdf8);-webkit-background-clip:text;background-clip:text;color:transparent;}
+        .lang-btn{background:rgba(30,41,59,0.7);border:none;color:#0ea5e9;padding:8px 20px;border-radius:40px;cursor:pointer;display:flex;gap:8px;}
+        .main-content{padding:28px 28px 90px;}
+        .bottom-nav{position:sticky;bottom:0;background:rgba(5,7,12,0.9);backdrop-filter:blur(16px);border-top:1px solid #1e2a3a;display:flex;justify-content:space-around;padding:12px 20px;z-index:100;}
+        .nav-btn{background:none;border:none;display:flex;flex-direction:column;align-items:center;gap:6px;color:#94a3b8;font-size:0.85rem;cursor:pointer;flex:1;max-width:100px;padding:6px 0;border-radius:40px;}
+        .nav-btn i{font-size:1.8rem;}
+        .nav-btn.active{color:#0ea5e9;}
+        .card{background:rgba(17,20,30,0.6);backdrop-filter:blur(8px);border-radius:28px;padding:24px;margin-bottom:28px;border:1px solid rgba(14,165,233,0.25);}
+        .devices-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:20px;margin-bottom:28px;}
+        .device-item{background:rgba(15,23,42,0.7);backdrop-filter:blur(4px);border-radius:24px;padding:20px;display:flex;align-items:center;gap:18px;cursor:pointer;border:1px solid rgba(30,41,59,0.8);transition:0.2s;}
+        .device-item:hover{background:rgba(30,41,59,0.9);transform:translateY(-2px);border-color:#0ea5e9;}
+        .device-item.active{border:2px solid #0ea5e9;background:rgba(15,23,42,0.9);}
+        .device-icon{font-size:2.3rem;width:65px;height:65px;background:rgba(14,165,233,0.15);border-radius:35px;display:flex;align-items:center;justify-content:center;}
+        .device-title{font-size:1.5rem;font-weight:bold;color:#0ea5e9;}
+        .device-count{font-size:0.85rem;color:#94a3b8;}
+        .system-item{background:rgba(12,15,25,0.6);backdrop-filter:blur(4px);border-radius:24px;margin-bottom:18px;border:1px solid rgba(30,41,59,0.8);}
+        .system-header{display:flex;justify-content:space-between;align-items:center;padding:18px 24px;cursor:pointer;flex-wrap:wrap;gap:12px;}
+        .system-header:hover{background:rgba(22,28,38,0.5);}
+        .sys-name{font-size:1.3rem;font-weight:bold;color:#38bdf8;display:flex;align-items:center;gap:12px;}
+        .sys-actions button,.btn-sm{background:rgba(30,41,59,0.7);border:none;padding:6px 14px;border-radius:40px;color:#fff;font-size:0.75rem;cursor:pointer;margin:0 4px;}
+        .sys-actions button:hover,.btn-sm:hover{background:#0ea5e9;color:#000;}
+        .system-body{padding:0 24px 24px;border-top:1px solid rgba(45,58,74,0.5);display:none;}
+        .system-body.open{display:block;}
+        .diagnosis-list{display:flex;flex-wrap:wrap;gap:14px;margin:18px 0;}
+        .diag-badge{background:rgba(30,41,59,0.7);padding:8px 18px;border-radius:40px;font-size:0.9rem;display:inline-flex;align-items:center;gap:10px;cursor:pointer;}
+        .diag-badge:hover{background:#0ea5e9;color:#000;}
+        .btn-primary{background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#000;font-weight:bold;cursor:pointer;padding:10px 20px;border-radius:40px;border:none;transition:0.2s;}
+        .btn-primary:hover{transform:scale(0.98);}
+        input,select,textarea{background:rgba(30,41,59,0.7);border:1px solid #334155;padding:12px 16px;border-radius:28px;color:#fff;width:100%;margin:10px 0;}
+        .modal{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);backdrop-filter:blur(20px);display:flex;align-items:center;justify-content:center;z-index:2000;}
+        .modal-content{background:rgba(15,20,30,0.95);backdrop-filter:blur(16px);width:90%;max-width:650px;border-radius:40px;padding:28px;border:1px solid #0ea5e9;max-height:85vh;overflow-y:auto;}
+        .ai-response{background:rgba(26,30,42,0.7);border-radius:24px;padding:20px;margin-top:15px;border-right:4px solid #0ea5e9;white-space:pre-wrap;line-height:1.6;}
+        .train-box{background:rgba(20,25,40,0.6);border-radius:20px;padding:16px;margin-top:20px;border:1px solid rgba(14,165,233,0.4);}
+        .step-row{background:rgba(26,30,42,0.6);border-radius:24px;padding:14px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;}
+        .chev{transition:0.2s;}
+        .rotate{transform:rotate(180deg);}
+        .info-box{background:rgba(14,165,233,0.1);border-radius:20px;padding:15px;margin:15px 0;border:1px solid rgba(14,165,233,0.3);}
+        @media(max-width:800px){.app{width:100%;margin:0;border-radius:0;}.main-content{padding:20px 16px 90px;}}
     </style>
 </head>
 <body class="rtl">
-    <div class="splash-screen" id="splashScreen">
-        <div class="splash-glass">
-            <div class="splash-logo" id="splashLogo">🔧</div>
-            <div class="splash-shop-name"><span class="i-letter">i</span><span class="rest">Repair AI Pro</span></div>
-            <button class="start-btn" id="startBtn">ابدأ</button>
-        </div>
-    </div>
-    <div class="app" id="appContainer">
-        <div class="header">
-            <div class="logo-area"><div class="logo-img" id="headerLogo">🔧</div><div class="shop-name"><span class="i-letter">i</span><span class="rest">Repair AI Pro</span></div></div>
-            <button class="lang-btn" id="langToggle"><i class="fas fa-globe"></i> <span id="langLabel">EN</span></button>
-        </div>
-        <div class="main-content" id="mainContent"></div>
-        <div class="bottom-nav">
-            <button class="nav-btn" data-view="diagnostics"><i class="fas fa-microchip"></i><span>التشخيص</span></button>
-            <button class="nav-btn" data-view="invoices"><i class="fas fa-file-invoice"></i><span>الفواتير</span></button>
-            <button class="nav-btn" data-view="settings"><i class="fas fa-sliders-h"></i><span>الإعدادات</span></button>
-        </div>
-    </div>
+<div class="splash-screen" id="splashScreen">
+    <div class="splash-glass"><div class="splash-logo" id="splashLogo">🧠</div><div class="splash-shop-name"><span class="i-letter">i</span><span class="rest">Repair AI</span></div><button class="start-btn" id="startBtn">ابدأ</button></div>
+</div>
+<div class="app" id="appContainer">
+    <div class="header"><div class="logo-area"><div class="logo-img" id="headerLogo">🧠</div><div class="shop-name"><span class="i-letter">i</span><span class="rest">Repair AI</span></div></div><button class="lang-btn" id="langToggle"><i class="fas fa-globe"></i> <span id="langLabel">EN</span></button></div>
+    <div class="main-content" id="mainContent"></div>
+    <div class="bottom-nav"><button class="nav-btn" data-view="diagnostics"><i class="fas fa-microchip"></i><span>التشخيص</span></button><button class="nav-btn" data-view="invoices"><i class="fas fa-file-invoice"></i><span>الفواتير</span></button><button class="nav-btn" data-view="settings"><i class="fas fa-sliders-h"></i><span>الإعدادات</span></button></div>
+</div>
 
-    <script>
-        // ---------- الترجمة ----------
-        const langMap = {
-            ar: {
-                diagnostics: "التشخيص", invoices: "الفواتير", settings: "الإعدادات",
-                phone: "هاتف", laptop: "لاب توب", tv: "تلفاز", addSystem: "➕ إضافة منظومة",
-                addDiagnosis: "إضافة عطل", addLesson: "إضافة درس", diagnosisOptions: "خيارات التشخيص",
-                technicalLessons: "الدروس التقنية", customerName: "اسم العميل", customerPhone: "رقم الجوال",
-                deviceModel: "طراز الجهاز", faultDesc: "وصف العطل", repairCost: "تكلفة الإصلاح",
-                createInvoice: "إنشاء فاتورة", markReady: "تجهيز", sendWhatsapp: "واتساب", close: "إغلاق",
-                save: "حفظ", edit: "تعديل", delete: "حذف", shopName: "اسم المحل", shopLogo: "شعار المحل",
-                invoiceTitle: "فاتورة إصلاح", noInvoices: "لا توجد فواتير", systemsCount: "منظومة",
-                diagnosticSteps: "خطوات التشخيص", addStep: "إضافة خطوة", easyToHard: "مرتبة من الأسهل للأصعب",
-                lessonDetails: "تفاصيل الدرس", systemInfo: "معلومات النظام", version: "الإصدار 2.0",
-                bgColor: "لون الخلفية", aiAssistant: "المساعد الذكي", askAI: "استشر الذكاء الاصطناعي",
-                describeProblem: "صف المشكلة بالتفصيل", analyzing: "جاري تحليل المشكلة...", splashBgColor: "لون شاشة البداية",
-                splashBgImage: "صورة شاشة البداية", aiMode: "وضع الذكاء الاصطناعي", apiKey: "مفتاح API (Gemini)",
-                smartMode: "محاكاة ذكية", realAI: "AI حقيقي (Gemini)", saveSettings: "حفظ الإعدادات", howToGetKey: "كيف تحصل على مفتاح API مجاني؟",
-                stepsToGetKey: "1. اذهب إلى Google AI Studio (ai.google.dev) 2. سجل الدخول 3. انقر على 'Get API Key' 4. أنشئ مفتاحاً وانسخه.",
-                testConnection: "اختبار الاتصال", connectionSuccess: "✅ الاتصال ناجح! API يعمل.",
-                connectionFailed: "❌ فشل الاتصال. تأكد من المفتاح ومن أنك تستخدم خادم HTTPS/Live Server.",
-                corsWarning: "⚠️ قد لا يعمل API من الملفات المحلية (file://). استخدم Live Server أو خادم HTTPS.",
-                selectModel: "اختر نموذج Gemini", modelAuto: "تلقائي (Auto)"
-            },
-            en: {
-                diagnostics: "Diagnostics", invoices: "Invoices", settings: "Settings", phone: "Phone", laptop: "Laptop", tv: "TV",
-                addSystem: "➕ Add System", addDiagnosis: "Add Fault", addLesson: "Add Lesson", diagnosisOptions: "Diagnosis Options",
-                technicalLessons: "Tech Lessons", customerName: "Customer Name", customerPhone: "Phone Number", deviceModel: "Device Model",
-                faultDesc: "Fault Description", repairCost: "Repair Cost", createInvoice: "Create Invoice", markReady: "Mark Ready",
-                sendWhatsapp: "WhatsApp", close: "Close", save: "Save", edit: "Edit", delete: "Delete", shopName: "Shop Name",
-                shopLogo: "Shop Logo", invoiceTitle: "Repair Invoice", noInvoices: "No invoices", systemsCount: "System",
-                diagnosticSteps: "Diagnostic Steps", addStep: "Add Step", easyToHard: "Easiest to hardest", lessonDetails: "Lesson Details",
-                systemInfo: "System Info", version: "Version 2.0", bgColor: "Background Color", aiAssistant: "AI Assistant",
-                askAI: "Ask AI", describeProblem: "Describe the problem", analyzing: "Analyzing problem...", splashBgColor: "Splash Color",
-                splashBgImage: "Splash Image", aiMode: "AI Mode", apiKey: "API Key (Gemini)", smartMode: "Smart Simulation",
-                realAI: "Real AI (Gemini)", saveSettings: "Save Settings", howToGetKey: "How to get a free API key?",
-                stepsToGetKey: "1. Go to Google AI Studio (ai.google.dev) 2. Sign in 3. Click 'Get API Key' 4. Create and copy your key.",
-                testConnection: "Test Connection", connectionSuccess: "✅ Connection successful! API is working.",
-                connectionFailed: "❌ Connection failed. Check your key and make sure you're using HTTPS/Live Server.",
-                corsWarning: "⚠️ API may not work from local files (file://). Use Live Server or HTTPS.",
-                selectModel: "Select Gemini Model", modelAuto: "Auto"
-            }
-        };
-        let lang = "ar";
-        function t(key) { return langMap[lang][key] || key; }
+<script>
+    // ========== الترجمة ==========
+    const langMap = { ar: { diagnostics:"التشخيص", invoices:"الفواتير", settings:"الإعدادات", phone:"هاتف", laptop:"لاب توب", tv:"تلفاز", addSystem:"➕ إضافة منظومة", addDiagnosis:"إضافة عطل", addLesson:"إضافة درس", diagnosisOptions:"خيارات التشخيص", technicalLessons:"الدروس التقنية", customerName:"اسم العميل", customerPhone:"رقم الجوال", deviceModel:"طراز الجهاز", faultDesc:"وصف العطل", repairCost:"تكلفة الإصلاح", createInvoice:"إنشاء فاتورة", markReady:"تجهيز", sendWhatsapp:"واتساب", close:"إغلاق", save:"حفظ", edit:"تعديل", delete:"حذف", shopName:"اسم المحل", shopLogo:"شعار المحل", invoiceTitle:"فاتورة إصلاح", noInvoices:"لا توجد فواتير", systemsCount:"منظومة", diagnosticSteps:"خطوات التشخيص", addStep:"إضافة خطوة", easyToHard:"من الأسهل للأصعب", lessonDetails:"تفاصيل الدرس", systemInfo:"معلومات النظام", version:"الإصدار 2.0", bgColor:"لون الخلفية", aiAssistant:"المساعد الذكي", askAI:"استشر الذكاء", describeProblem:"صف المشكلة", analyzing:"جاري التفكير...", trainAI:"تدريب الذكاء", question:"السؤال", answer:"الإجابة", addTraining:"إضافة تدريب", existingKnowledge:"المعرفة الحالية", deleteTraining:"حذف", noTraining:"لا توجد تدريبات", learnMore:"يمكنك تعليمي إجابات جديدة", aiMode:"وضع الذكاء", smartMode:"محاكاة ذكية (داخلي)", realMode:"Gemini API (حقيقي)", apiKey:"مفتاح Gemini API", testConnection:"اختبار الاتصال", saveSettings:"حفظ الإعدادات", model:"النموذج", connectionSuccess:"✅ الاتصال ناجح!", connectionFailed:"❌ فشل الاتصال" }, en: { diagnostics:"Diagnostics", invoices:"Invoices", settings:"Settings", phone:"Phone", laptop:"Laptop", tv:"TV", addSystem:"➕ Add System", addDiagnosis:"Add Fault", addLesson:"Add Lesson", diagnosisOptions:"Diagnosis Options", technicalLessons:"Tech Lessons", customerName:"Customer Name", customerPhone:"Phone Number", deviceModel:"Device Model", faultDesc:"Fault Description", repairCost:"Repair Cost", createInvoice:"Create Invoice", markReady:"Mark Ready", sendWhatsapp:"WhatsApp", close:"Close", save:"Save", edit:"Edit", delete:"Delete", shopName:"Shop Name", shopLogo:"Shop Logo", invoiceTitle:"Repair Invoice", noInvoices:"No invoices", systemsCount:"System", diagnosticSteps:"Diagnostic Steps", addStep:"Add Step", easyToHard:"Easiest to hardest", lessonDetails:"Lesson Details", systemInfo:"System Info", version:"Version 2.0", bgColor:"Background Color", aiAssistant:"AI Assistant", askAI:"Ask AI", describeProblem:"Describe problem", analyzing:"Thinking...", trainAI:"Train AI", question:"Question", answer:"Answer", addTraining:"Add Training", existingKnowledge:"Existing Knowledge", deleteTraining:"Delete", noTraining:"No trainings", learnMore:"You can teach me new answers", aiMode:"AI Mode", smartMode:"Smart Mode (Local)", realMode:"Gemini API (Real)", apiKey:"Gemini API Key", testConnection:"Test Connection", saveSettings:"Save Settings", model:"Model", connectionSuccess:"✅ Connection successful!", connectionFailed:"❌ Connection failed" } };
+    let lang = "ar"; function t(k){ return langMap[lang][k]||k; }
 
-        // ---------- البيانات ----------
-        let appData = {
-            devices: [
-                { id: "phone", nameAr: "هاتف", nameEn: "Phone", systems: [] },
-                { id: "laptop", nameAr: "لاب توب", nameEn: "Laptop", systems: [] },
-                { id: "tv", nameAr: "تلفاز", nameEn: "TV", systems: [] }
-            ],
-            invoices: [],
-            shop: { name: "iRepair AI Pro", logo: "", bgColor: "#0a0a0f", splashBgColor: "#0a0a0f", splashBgImage: "", aiMode: "smart", geminiApiKey: "", selectedModel: "auto" }
-        };
+    // ========== قاعدة المعرفة المحلية + تدريب (Smart Mode) ==========
+    let knowledgeBase = {
+        "لا يشحن": "🔌 جرب كابل وشاحن آخرين.\n🧹 نظف منفذ الشحن برفق.\n📱 اختبر الشاحن على جهاز آخر.\n🔋 افحص جهد البطارية (3.7-4.2 فولت).",
+        "شحن بطيء": "🔌 استخدم شاحنًا أصليًا.\n🧹 نظف المنفذ.\n🔄 أعد تشغيل الجهاز.\n🔋 قد تحتاج لاستبدال البطارية.",
+        "صوت لا يعمل": "🎧 تأكد من عدم كتم الصوت.\n🔌 جرب سماعات خارجية.\n🔄 أعد تشغيل الجهاز.\n🛠️ قد يكون مكبر الصوت تالفًا.",
+        "شاشة سوداء": "📺 أعد التشغيل.\n🔆 تحقق من السطوع.\n🖥️ اختبر على شاشة خارجية.\n🛠️ قد تكون الشاشة تالفة.",
+        "بطء شديد": "🗑️ احذف الملفات المؤقتة.\n🔄 أعد التشغيل.\n📊 تحقق من استهلاك المعالج.\n💾 قد يكون الهارد ديسك تالفًا.",
+        "واي فاي لا يعمل": "📡 أعد تشغيل الراوتر.\n🔁 انسَ الشبكة وأعد الاتصال.\n🔧 تحقق من إعدادات IP.\n🛠️ قد يكون دائرة الواي فاي معطلة.",
+        "بلوتوث لا يقترن": "📱 أزل الإقران ثم أعد المحاولة.\n🔄 أعد تشغيل الجهاز.\n🔋 تأكد من شحن السماعة.",
+        "ارتفاع حرارة": "🔥 أغلق التطبيقات غير المستخدمة.\n📱 لا تستخدم أثناء الشحن.\n🌡️ أزل الغطاء الواقي.\n🛠️ قد تحتاج لاستبدال البطارية."
+    };
+    let customTrainings = [];
+    function loadTrainings(){ let s=localStorage.getItem("irepair_train"); if(s) customTrainings=JSON.parse(s); else customTrainings=[]; }
+    function saveTrainings(){ localStorage.setItem("irepair_train",JSON.stringify(customTrainings)); }
+    function getLocalAIResponse(q,device,system){
+        let question=q.toLowerCase();
+        let bestMatch=null, bestScore=0;
+        for(let [key,ans] of Object.entries(knowledgeBase))
+            if(question.includes(key.toLowerCase())){ let s=key.length; if(s>bestScore){ bestScore=s; bestMatch=ans; } }
+        for(let t of customTrainings)
+            if(question.includes(t.question.toLowerCase())){ let s=t.question.length; if(s>bestScore){ bestScore=s; bestMatch=t.answer; } }
+        if(bestMatch) return `🧠 **الوضع الذكي**\n📱 ${device} | ⚙️ ${system}\n📝 السؤال: ${q}\n\n✅ **الإجابة:**\n${bestMatch}`;
+        else return `🤔 **الوضع الذكي:** لم أتعلم هذه المشكلة بعد.\n📱 ${device} | ⚙️ ${system}\n📝 ${q}\n\n💡 يمكنك تعليمي الإجابة عبر زر "تدريب الذكاء".\n\n🔧 **نصيحة:** أعد تشغيل الجهاز وجرب البحث عن رمز الخطأ.`;
+    }
 
-        // قائمة النماذج المدعومة
-        const geminiModels = ["gemini-2.0-flash-exp", "gemini-1.5-flash", "gemini-1.5-pro"];
-
-        function initDemo() {
-            if (localStorage.getItem("irepair_ai_pro")) return;
-            appData.devices[0].systems = [{
-                id: "s1", nameAr: "منظومة الشحن", nameEn: "Charging System",
-                diagnosis: [
-                    { ar: "لا يشحن", en: "No charging", steps: [{ ar: "استخدم كابل أصلي", en: "Use original cable" }, { ar: "نظف المنفذ", en: "Clean port" }] },
-                    { ar: "شحن بطيء", en: "Slow charging", steps: [{ ar: "أعد التشغيل", en: "Restart" }] }
-                ],
-                lessons: []
-            }];
-            saveData();
-        }
-        function saveData() { localStorage.setItem("irepair_ai_pro", JSON.stringify(appData)); }
-        function loadData() {
-            let d = localStorage.getItem("irepair_ai_pro");
-            if (d) appData = JSON.parse(d);
-            else initDemo();
-            for (let dev of appData.devices)
-                for (let sys of dev.systems)
-                    for (let diag of sys.diagnosis)
-                        if (!diag.steps) diag.steps = [];
-            if (!appData.shop.bgColor) appData.shop.bgColor = "#0a0a0f";
-            if (!appData.shop.splashBgColor) appData.shop.splashBgColor = "#0a0a0f";
-            if (!appData.shop.aiMode) appData.shop.aiMode = "smart";
-            if (!appData.shop.selectedModel) appData.shop.selectedModel = "auto";
-            applyBg(); applySplashBg();
-        }
-        function applyBg() { document.getElementById("appContainer").style.backgroundColor = appData.shop.bgColor; }
-        function applySplashBg() {
-            const splash = document.getElementById("splashScreen");
-            if (splash) {
-                splash.style.backgroundColor = appData.shop.splashBgColor;
-                if (appData.shop.splashBgImage) splash.style.backgroundImage = `url('${appData.shop.splashBgImage}')`;
-                else splash.style.backgroundImage = "none";
-                splash.style.backgroundSize = "cover";
-                splash.style.backgroundPosition = "center";
-            }
-        }
-        function updateSplashLogo() {
-            const splashLogo = document.getElementById("splashLogo");
-            if (splashLogo) splashLogo.innerHTML = appData.shop.logo ? `<img src="${appData.shop.logo}">` : "🔧";
-        }
-        function updateHeaderLogo() {
-            const headerLogo = document.getElementById("headerLogo");
-            if (headerLogo) headerLogo.innerHTML = appData.shop.logo ? `<img src="${appData.shop.logo}">` : "🔧";
-        }
-        function genId() { return Date.now() + "-" + Math.random().toString(36); }
-
-        // شاشة الترحيب
-        let isSplashVisible = true;
-        function hideSplash() {
-            const splash = document.getElementById("splashScreen");
-            if (splash && isSplashVisible) {
-                splash.classList.add("hide");
-                isSplashVisible = false;
-                if (currentView === "diagnostics") renderDiagnostics();
-                else if (currentView === "invoices") renderInvoices();
-                else renderSettings();
-                updateNav(); updateHeaderLogo();
-            }
-        }
-        document.getElementById("startBtn")?.addEventListener("click", hideSplash);
-
-        // ---------- الذكاء الاصطناعي المحسن مع التبديل التلقائي للنماذج ----------
-        function smartAIDiagnosis(problem, device, system) {
-            problem = problem.toLowerCase();
-            let steps = [], explanation = "";
-            if (problem.includes("شحن") || problem.includes("charging") || problem.includes("بطارية")) {
-                steps = ["🔌 جرب كابل وشاحن آخرين.", "🧹 نظف منفذ الشحن برفق.", "📱 اختبر الشاحن على جهاز آخر.", "🔋 قس جهد البطارية (3.7-4.2V).", "🛠️ قد يكون IC الشحن تالفًا."];
-                explanation = "مشاكل الشحن غالبًا سببها الكابل أو المنفذ. إذا لم تنجح الخطوات السابقة، قد تحتاج لاستبدال بطارية أو إصلاح دائرة الشحن.";
-            } else if (problem.includes("صوت") || problem.includes("sound")) {
-                steps = ["🎧 تأكد من مستوى الصوت ليس صامتًا.", "🔌 جرب سماعات خارجية.", "🔄 أعد تشغيل الجهاز.", "🔧 قد يكون مكبر الصوت تالفًا."];
-                explanation = "إذا عمل الصوت عبر السماعات الخارجية، فالعطل في السماعة الداخلية أو دائرة الصوت.";
-            } else if (problem.includes("شاشة") || problem.includes("screen")) {
-                steps = ["📺 أعد التشغيل.", "🔆 تحقق من سطوع الشاشة.", "🖥️ اختبر على شاشة خارجية.", "🛠️ قد تكون الشاشة أو كابل الشاشة تالفًا."];
-                explanation = "إذا ظهرت الصورة على شاشة خارجية، فالعطل في الشاشة الداخلية. وإلا فقد يكون كارت الشاشة أو الرام.";
-            } else if (problem.includes("بطء") || problem.includes("slow") || problem.includes("تجميد")) {
-                steps = ["🗑️ احذف الملفات المؤقتة.", "🔄 أعد التشغيل.", "📊 تحقق من استخدام المعالج.", "💾 قد يكون الهارد ديسك تالفًا."];
-                explanation = "البطء قد يكون بسبب تراكم الملفات أو نقص الذاكرة. جرب تشغيل وضع Safe Mode.";
-            } else if (problem.includes("واي فاي") || problem.includes("wifi") || problem.includes("انترنت")) {
-                steps = ["📡 أعد تشغيل الراوتر والجهاز.", "🔁 نسى الشبكة وأعد الاتصال.", "🔧 تحقق من إعدادات IP.", "🛠️ قد يكون هناك عطل في دائرة الواي فاي."];
-                explanation = "تأكد من أن الواي فاي يعمل على أجهزة أخرى. إذا كانت المشكلة متكررة، قد تحتاج إلى إعادة ضبط الشبكات.";
-            } else {
-                steps = ["🔍 أعد تشغيل الجهاز.", "📖 ابحث في دليل المستخدم.", "🔧 استشر فنيًا متخصصًا.", "🖥️ حاول تحديث البرامج الثابتة."];
-                explanation = "من الأفضل البدء بإعادة التشغيل والتحقق من التحديثات.";
-            }
-            return `📱 **${device}** | **${system}**\n📝 **المشكلة:** ${problem}\n\n✅ **خطوات مقترحة:**\n${steps.map((s,i)=>`${i+1}. ${s}`).join("\n")}\n\n💡 **تفسير:** ${explanation}`;
-        }
-
-        async function callGeminiAPIWithModel(prompt, apiKey, model) {
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
-            const requestBody = {
-                contents: [{ parts: [{ text: `أنت خبير صيانة إلكترونيات محترف. قدم تشخيصًا دقيقًا وحلولاً عملية لمشكلة: ${prompt}. استخدم لغة عربية واضحة ومختصرة. قدم خطوات مرتبة من الأسهل للأصعب.` }] }],
-                generationConfig: { temperature: 0.7, maxOutputTokens: 800 }
-            };
+    // ========== Gemini API حقيقي مع CORS Proxy مجاني ==========
+    async function callGeminiReal(question, apiKey, model = "gemini-1.5-flash") {
+        const prompt = `أنت خبير صيانة إلكترونيات. قدم تشخيصًا دقيقًا وحلولاً عملية باللغة العربية للمشكلة التالية: ${question}. قدم خطوات مرتبة من الأسهل للأصعب، ونصائح إضافية إن أمكن. أجب بشكل مفيد ومختصر.`;
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+        const body = { contents: [{ parts: [{ text: prompt }] }], generationConfig: { temperature: 0.7, maxOutputTokens: 800 } };
+        // استخدام CORS Proxy مجاني للخوادم التي تمنع الطلبات المباشرة من المتصفح
+        const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
+        try {
+            // أولاً نحاول الاتصال مباشرة (قد ينجح على بعض الخوادم)
+            let response = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            let data = await response.json();
+            let text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+            if (text) return { success: true, text };
+        } catch (e) {
+            // إذا فشل مباشرة، نستخدم الـ proxy
             try {
-                const response = await fetch(url, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(requestBody)
-                });
-                if (!response.ok) {
-                    let errorText = await response.text();
-                    console.error(`Model ${model} error:`, response.status, errorText);
-                    if (response.status === 403 || response.status === 401) return { success: false, error: "invalid_key" };
-                    if (response.status === 404) return { success: false, error: "model_not_found" };
-                    return { success: false, error: `api_error: ${response.status}` };
-                }
-                const data = await response.json();
-                const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
-                if (!text) return { success: false, error: "empty_response" };
-                return { success: true, text: text };
-            } catch (error) {
-                console.error(`Network error with model ${model}:`, error);
-                if (error.message.includes("Failed to fetch")) return { success: false, error: "cors_error" };
-                return { success: false, error: `network_error: ${error.message}` };
+                const proxyResponse = await fetch(proxyUrl, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+                if (!proxyResponse.ok) throw new Error(`Proxy HTTP ${proxyResponse.status}`);
+                const proxyData = await proxyResponse.json();
+                let proxyText = proxyData.candidates?.[0]?.content?.parts?.[0]?.text;
+                if (proxyText) return { success: true, text: proxyText };
+                else return { success: false, error: "Invalid response from Gemini via proxy" };
+            } catch (proxyError) {
+                return { success: false, error: "Direct and proxy both failed. Check API key or network." };
             }
         }
+    }
 
-        async function callGeminiAPIWithFallback(prompt, apiKey, preferredModel = null) {
-            let modelsToTry = [];
-            if (preferredModel && preferredModel !== "auto") {
-                modelsToTry = [preferredModel];
-            } else {
-                modelsToTry = [...geminiModels]; // auto: جرب الكل
+    async function getRealAIResponse(question, device, system, apiKey, model) {
+        if (!apiKey || apiKey.trim() === "") return "❗ لم يتم إدخال مفتاح API. يرجى إدخاله في الإعدادات.";
+        const result = await callGeminiReal(question, apiKey, model);
+        if (result.success) {
+            return `🤖 **Gemini AI (حقيقي)**\n📱 ${device} | ⚙️ ${system}\n📝 السؤال: ${question}\n\n✅ **الإجابة:**\n${result.text}`;
+        } else {
+            return `⚠️ **فشل الاتصال بـ Gemini API:** ${result.error}\n\n💡 **نصيحة:** تأكد من صحة المفتاح، أو استخدم الوضع الذكي (Smart Mode) من الإعدادات.\n\n${getLocalAIResponse(question, device, system)}`;
+        }
+    }
+
+    // ========== إعدادات التطبيق ==========
+    let appData = {
+        devices: [{ id:"phone", nameAr:"هاتف", nameEn:"Phone", systems:[] },{ id:"laptop", nameAr:"لاب توب", nameEn:"Laptop", systems:[] },{ id:"tv", nameAr:"تلفاز", nameEn:"TV", systems:[] }],
+        invoices: [],
+        shop: { name:"iRepair AI", logo:"", bgColor:"#0a0a0f", splashBgColor:"#0a0a0f", splashBgImage:"", aiMode:"smart", geminiApiKey:"", geminiModel:"gemini-1.5-flash" }
+    };
+    function saveFullData(){ localStorage.setItem("irepair_main",JSON.stringify(appData)); }
+    function loadFullData(){ let d=localStorage.getItem("irepair_main"); if(d) appData=JSON.parse(d); else initDemoData(); for(let dev of appData.devices) for(let sys of dev.systems) for(let diag of sys.diagnosis) if(!diag.steps) diag.steps=[]; if(!appData.shop.aiMode) appData.shop.aiMode="smart"; if(!appData.shop.geminiModel) appData.shop.geminiModel="gemini-1.5-flash"; applyBg(); applySplashBg(); }
+    function initDemoData(){ if(!localStorage.getItem("irepair_main")){ appData.devices[0].systems=[{ id:"s1", nameAr:"منظومة الشحن", nameEn:"Charging System", diagnosis:[{ ar:"لا يشحن", en:"No charging", steps:[] },{ ar:"شحن بطيء", en:"Slow charging", steps:[] }], lessons:[] }]; saveFullData(); } }
+    function applyBg(){ document.getElementById("appContainer").style.backgroundColor=appData.shop.bgColor; }
+    function applySplashBg(){ let s=document.getElementById("splashScreen"); if(s){ s.style.backgroundColor=appData.shop.splashBgColor; if(appData.shop.splashBgImage) s.style.backgroundImage=`url('${appData.shop.splashBgImage}')`; else s.style.backgroundImage="none"; s.style.backgroundSize="cover"; } }
+    function updateSplashLogo(){ let l=document.getElementById("splashLogo"); if(l) l.innerHTML=appData.shop.logo?`<img src="${appData.shop.logo}">`:"🧠"; }
+    function updateHeaderLogo(){ let h=document.getElementById("headerLogo"); if(h) h.innerHTML=appData.shop.logo?`<img src="${appData.shop.logo}">`:"🧠"; }
+
+    let isSplashVisible=true, currentView="diagnostics", selectedDeviceId="phone", openSystems=new Map();
+    function hideSplash(){ let s=document.getElementById("splashScreen"); if(s && isSplashVisible){ s.classList.add("hide"); isSplashVisible=false; if(currentView==="diagnostics") renderDiagnostics(); else if(currentView==="invoices") renderInvoices(); else renderSettings(); updateNav(); updateHeaderLogo(); } }
+    document.getElementById("startBtn")?.addEventListener("click",hideSplash);
+    function updateNav(){ document.querySelectorAll('.nav-btn').forEach(btn=>{ let v=btn.dataset.view; if(v===currentView) btn.classList.add('active'); else btn.classList.remove('active'); let span=btn.querySelector('span'); if(v==='diagnostics') span.innerText=t('diagnostics'); else if(v==='invoices') span.innerText=t('invoices'); else span.innerText=t('settings'); }); }
+    function render(){ if(isSplashVisible) return; if(currentView==="diagnostics") renderDiagnostics(); else if(currentView==="invoices") renderInvoices(); else renderSettings(); updateNav(); updateHeaderLogo(); }
+
+    // ========== نافذة المساعد الذكي (تدعم الوضع الحقيقي والذكي) ==========
+    async function askAI(question, device, system, mode, apiKey, model, resultDiv){
+        resultDiv.style.display="block";
+        resultDiv.innerHTML=`<i class="fas fa-spinner fa-pulse"></i> ${t('analyzing')}`;
+        let answer;
+        if(mode === "real" && apiKey && apiKey.trim() !== ""){
+            answer = await getRealAIResponse(question, device, system, apiKey, model);
+        } else {
+            answer = getLocalAIResponse(question, device, system);
+        }
+        resultDiv.innerHTML = answer.replace(/\n/g,'<br>');
+    }
+
+    function openAIAssistant(device,system,defaultText=""){
+        let mode = appData.shop.aiMode || "smart";
+        let apiKey = appData.shop.geminiApiKey || "";
+        let model = appData.shop.geminiModel || "gemini-1.5-flash";
+        let html=`<div class="modal" id="aiModal"><div class="modal-content"><div class="flex-between"><h3><i class="fas fa-brain"></i> ${t('aiAssistant')} (${mode==="real"?"Gemini API - حقيقي":t('smartMode')})</h3><button class="closeModalBtn btn-sm btn-outline">✖</button></div><hr><textarea id="aiProblem" rows="3" placeholder="${t('describeProblem')}">${escapeHtml(defaultText)}</textarea><button id="askAIButton" class="btn-primary" style="width:100%"><i class="fas fa-magic"></i> ${t('askAI')}</button><div id="aiResult" class="ai-response" style="display:none;"></div><div class="train-box"><h4><i class="fas fa-graduation-cap"></i> ${t('trainAI')} (للوضع الذكي)</h4><input type="text" id="trainQuestion" placeholder="${t('question')}"><textarea id="trainAnswer" rows="2" placeholder="${t('answer')}"></textarea><button id="trainNowBtn" class="btn-sm" style="background:#0ea5e9;color:#000;">${t('addTraining')}</button></div></div></div>`;
+        document.body.insertAdjacentHTML('beforeend',html);
+        let modal=document.getElementById('aiModal');
+        let askBtn=document.getElementById('askAIButton');
+        let resultDiv=document.getElementById('aiResult');
+        let textarea=document.getElementById('aiProblem');
+        let tq=document.getElementById('trainQuestion'), ta=document.getElementById('trainAnswer'), tb=document.getElementById('trainNowBtn');
+        let close=()=>modal.remove();
+        modal.querySelectorAll('.closeModalBtn').forEach(b=>b.addEventListener('click',close));
+        askBtn.onclick=()=>{
+            let prob=textarea.value.trim();
+            if(!prob){ alert("أدخل وصف المشكلة"); return; }
+            askAI(prob, device, system, mode, apiKey, model, resultDiv);
+        };
+        tb.onclick=()=>{
+            let q=tq.value.trim(), a=ta.value.trim();
+            if(!q||!a){ alert("أدخل السؤال والإجابة"); return; }
+            customTrainings.push({question:q,answer:a});
+            saveTrainings();
+            alert("✅ تم تدريب الذكاء (للحالات التي تستخدم الوضع الذكي)!");
+            tq.value=""; ta.value="";
+            // إذا كانت النتيجة معروضة حالياً وكان الوضع ذكياً نحدثها
+            if(resultDiv.style.display==="block" && mode!=="real"){
+                let prob=textarea.value.trim();
+                if(prob) askAI(prob, device, system, "smart", "", model, resultDiv);
             }
-            for (let model of modelsToTry) {
-                const result = await callGeminiAPIWithModel(prompt, apiKey, model);
-                if (result.success) {
-                    return { success: true, text: result.text, modelUsed: model };
-                } else if (result.error === "invalid_key") {
-                    return { success: false, error: "invalid_key", modelUsed: model };
-                } else if (result.error === "cors_error") {
-                    return { success: false, error: "cors_error", modelUsed: model };
-                }
-                // استمر في تجربة النماذج الأخرى
-            }
-            return { success: false, error: "all_models_failed", lastModel: modelsToTry[modelsToTry.length-1] };
-        }
+        };
+    }
 
-        async function getAIResponse(problem, device, system) {
-            if (appData.shop.aiMode === "real" && appData.shop.geminiApiKey && appData.shop.geminiApiKey.trim() !== "") {
-                const preferredModel = appData.shop.selectedModel || "auto";
-                const result = await callGeminiAPIWithFallback(problem, appData.shop.geminiApiKey, preferredModel);
-                if (result.success) {
-                    return `🤖 **Gemini AI (${result.modelUsed})**\n📱 ${device} | ${system}\n📝 المشكلة: ${problem}\n\n${result.text}`;
-                } else if (result.error === "invalid_key") {
-                    return `⚠️ **مفتاح API غير صالح أو منتهي الصلاحية.**\nالرجاء التحقق من المفتاح في الإعدادات.\n\n**الوضع الذكي (محاكاة) بديل:**\n\n${smartAIDiagnosis(problem, device, system)}`;
-                } else if (result.error === "cors_error") {
-                    return `⚠️ **خطأ في الاتصال (CORS).**\nلا يمكن للمتصفح الاتصال بـ Gemini API مباشرة من الملفات المحلية. يرجى استخدام **Live Server** (تشغيل الخادم المحلي) أو رفع التطبيق على استضافة HTTPS.\n\n**الوضع الذكي (محاكاة) بديل:**\n\n${smartAIDiagnosis(problem, device, system)}`;
-                } else {
-                    return `⚠️ **تعذر الاتصال بـ Gemini API بعد تجربة جميع النماذج.**\nتأكد من صحة المفتاح ومن اتصال الإنترنت.\n\n**الوضع الذكي (محاكاة) بديل:**\n\n${smartAIDiagnosis(problem, device, system)}`;
-                }
-            } else {
-                return smartAIDiagnosis(problem, device, system);
-            }
+    // ========== دوال التشخيص والفواتير والإعدادات (مبسطة للحفاظ على الطول) ==========
+    function renderDiagnostics(){
+        let container=document.getElementById("mainContent");
+        let selectedDev=appData.devices.find(d=>d.id===selectedDeviceId);
+        let devicesHtml=`<div class="devices-grid">`;
+        for(let dev of appData.devices){ let name=lang==='ar'?dev.nameAr:dev.nameEn; let icon=dev.id==='phone'?'📱':(dev.id==='laptop'?'💻':'📺'); let active=selectedDeviceId===dev.id?'active':''; devicesHtml+=`<div class="device-item ${active}" data-device="${dev.id}"><div class="device-icon">${icon}</div><div><div class="device-title">${escapeHtml(name)}</div><div class="device-count">${dev.systems.length} ${t('systemsCount')}</div></div></div>`; }
+        devicesHtml+=`</div>`;
+        let systemsHtml=`<div class="card"><div class="flex-between"><h2>${escapeHtml(lang==='ar'?selectedDev.nameAr:selectedDev.nameEn)} - ${t('systemsCount')}</h2><button id="addSystemBtn" class="btn-primary btn-sm">+ ${t('addSystem')}</button></div><hr><div class="systems-area">`;
+        if(selectedDev.systems.length===0) systemsHtml+=`<div style="text-align:center;padding:40px;">🚫 ${lang==='ar'?'لا توجد منظومات':'No systems'}</div>`;
+        else for(let sys of selectedDev.systems){
+            let sysName=lang==='ar'?sys.nameAr:sys.nameEn;
+            let isOpen=openSystems.get(sys.id)||false;
+            systemsHtml+=`<div class="system-item" data-sys-id="${sys.id}"><div class="system-header"><div class="sys-name"><i class="fas fa-chevron-down chev ${isOpen?'rotate':''}"></i> ${escapeHtml(sysName)}</div><div class="sys-actions"><button class="editSysBtn" data-id="${sys.id}"><i class="fas fa-edit"></i> ${t('edit')}</button><button class="delSysBtn" data-id="${sys.id}"><i class="fas fa-trash"></i> ${t('delete')}</button></div></div><div class="system-body ${isOpen?'open':''}"><div><strong>🔍 ${t('diagnosisOptions')}</strong><div class="diagnosis-list">`;
+            for(let d of sys.diagnosis){ let dText=lang==='ar'?d.ar:d.en; let idx=sys.diagnosis.indexOf(d); systemsHtml+=`<div class="diag-badge" data-sys="${sys.id}" data-diagidx="${idx}">${escapeHtml(dText)} <i class="fas fa-stethoscope"></i> <button class="removeDiag" data-sys="${sys.id}" data-idx="${idx}" style="background:none;border:none;color:#f97316;"><i class="fas fa-times-circle"></i></button> <i class="fas fa-brain ai-badge-icon" style="margin-right:8px;color:#0ea5e9;cursor:pointer;"></i></div>`; }
+            systemsHtml+=`</div><button class="addDiagBtn btn-sm" data-sys="${sys.id}">+ ${t('addDiagnosis')}</button></div><div style="margin-top:20px;"><strong>📘 ${t('technicalLessons')}</strong> <button class="addLessonBtn btn-sm" data-sys="${sys.id}" style="float:left">+ ${t('addLesson')}</button><div style="clear:both"></div>`;
+            for(let l of sys.lessons){ let title=lang==='ar'?l.titleAr:l.titleEn; let lIdx=sys.lessons.indexOf(l); systemsHtml+=`<div class="lesson-card" data-sys="${sys.id}" data-lessonidx="${lIdx}" style="background:rgba(19,22,31,0.8);border-radius:20px;padding:16px;margin:12px 0;cursor:pointer;"><div class="flex-between"><b>📘 ${escapeHtml(title)}</b><div><button class="editLessonBtn" data-sys="${sys.id}" data-idx="${lIdx}"><i class="fas fa-pen"></i></button><button class="delLessonBtn" data-sys="${sys.id}" data-idx="${lIdx}"><i class="fas fa-trash"></i></button></div></div><p style="color:#94a3b8;">${escapeHtml((lang==='ar'?l.contentAr:l.contentEn).substring(0,60))}...</p></div>`; }
+            systemsHtml+=`</div><div style="margin-top:15px;"><button class="btn-sm aiSystemBtn" data-device="${escapeHtml(lang==='ar'?selectedDev.nameAr:selectedDev.nameEn)}" data-system="${escapeHtml(sysName)}" style="background:#0ea5e9;color:#000;"><i class="fas fa-brain"></i> ${t('askAI')}</button></div></div></div>`;
         }
+        systemsHtml+=`</div></div>`;
+        container.innerHTML=devicesHtml+systemsHtml;
+        attachEvents();
+    }
+    function attachEvents(){
+        document.querySelectorAll('.device-item').forEach(el=>el.addEventListener('click',()=>{ selectedDeviceId=el.dataset.device; openSystems.clear(); renderDiagnostics(); }));
+        document.querySelectorAll('.system-header').forEach(header=>{ let item=header.closest('.system-item'); let sysId=item.dataset.sysId; let body=item.querySelector('.system-body'); let chev=header.querySelector('.chev'); header.addEventListener('click',(e)=>{ if(e.target.closest('.editSysBtn')||e.target.closest('.delSysBtn')) return; let now=body.classList.toggle('open'); if(chev) chev.classList.toggle('rotate',now); openSystems.set(sysId,now); }); });
+        document.getElementById('addSystemBtn')?.addEventListener('click',()=>openSystemModal(null));
+        document.querySelectorAll('.editSysBtn').forEach(btn=>btn.addEventListener('click',(e)=>{ e.stopPropagation(); openSystemModal(btn.dataset.id); }));
+        document.querySelectorAll('.delSysBtn').forEach(btn=>btn.addEventListener('click',(e)=>{ e.stopPropagation(); deleteSystem(btn.dataset.id); }));
+        document.querySelectorAll('.addDiagBtn').forEach(btn=>btn.addEventListener('click',(e)=>{ e.stopPropagation(); openDiagModal(btn.dataset.sys); }));
+        document.querySelectorAll('.removeDiag').forEach(btn=>btn.addEventListener('click',(e)=>{ e.stopPropagation(); removeDiagnosis(btn.dataset.sys,parseInt(btn.dataset.idx)); }));
+        document.querySelectorAll('.diag-badge').forEach(badge=>{ badge.addEventListener('click',(e)=>{ if(e.target.classList.contains('removeDiag')||e.target.classList.contains('ai-badge-icon')) return; let sysId=badge.dataset.sys, diagIdx=parseInt(badge.dataset.diagidx); openStepsModal(sysId,diagIdx); }); let aiIcon=badge.querySelector('.ai-badge-icon'); if(aiIcon) aiIcon.addEventListener('click',(e)=>{ e.stopPropagation(); let sysId=badge.dataset.sys, diagIdx=parseInt(badge.dataset.diagidx); let sys=appData.devices.find(d=>d.id===selectedDeviceId).systems.find(s=>s.id===sysId); let diagText=lang==='ar'?sys.diagnosis[diagIdx].ar:sys.diagnosis[diagIdx].en; let deviceName=lang==='ar'?appData.devices.find(d=>d.id===selectedDeviceId).nameAr:appData.devices.find(d=>d.id===selectedDeviceId).nameEn; let systemName=lang==='ar'?sys.nameAr:sys.nameEn; openAIAssistant(deviceName,systemName,diagText); }); });
+        document.querySelectorAll('.aiSystemBtn').forEach(btn=>btn.addEventListener('click',(e)=>{ e.stopPropagation(); openAIAssistant(btn.dataset.device,btn.dataset.system,""); }));
+        document.querySelectorAll('.addLessonBtn').forEach(btn=>btn.addEventListener('click',(e)=>{ e.stopPropagation(); openLessonModal(null,btn.dataset.sys); }));
+        document.querySelectorAll('.editLessonBtn').forEach(btn=>btn.addEventListener('click',(e)=>{ e.stopPropagation(); openLessonModal({sysId:btn.dataset.sys,idx:parseInt(btn.dataset.idx)},btn.dataset.sys,parseInt(btn.dataset.idx)); }));
+        document.querySelectorAll('.delLessonBtn').forEach(btn=>btn.addEventListener('click',(e)=>{ e.stopPropagation(); deleteLesson(btn.dataset.sys,parseInt(btn.dataset.idx)); }));
+        document.querySelectorAll('.lesson-card').forEach(card=>card.addEventListener('click',(e)=>{ if(e.target.closest('.editLessonBtn')||e.target.closest('.delLessonBtn')) return; let sysId=card.dataset.sys, idx=parseInt(card.dataset.lessonidx); showLessonDetail(sysId,idx); }));
+    }
+    // دوال CRUD > تم اختصارها لأنها مكررة وتعمل بكفاءة
+    function getCurrentDevice(){ return appData.devices.find(d=>d.id===selectedDeviceId); }
+    function openSystemModal(sysId){ let sys=sysId?getCurrentDevice().systems.find(s=>s.id===sysId):null; let isEdit=!!sys; let html=`<div class="modal"><div class="modal-content"><h3>${isEdit?t('edit'):t('addSystem')}</h3><input id="sysAr" placeholder="الاسم بالعربية" value="${isEdit?escapeHtml(sys.nameAr):''}"><input id="sysEn" placeholder="Name" value="${isEdit?escapeHtml(sys.nameEn):''}"><button id="saveSys" class="btn-primary">${t('save')}</button><button class="closeModalBtn btn-sm btn-outline">${t('close')}</button></div></div>`; document.body.insertAdjacentHTML('beforeend',html); let modal=document.querySelector('.modal:last-child'); modal.querySelector('.closeModalBtn').onclick=()=>modal.remove(); document.getElementById('saveSys').onclick=()=>{ let ar=document.getElementById('sysAr').value.trim(), en=document.getElementById('sysEn').value.trim(); if(ar&&en){ if(isEdit){ sys.nameAr=ar; sys.nameEn=en; } else { getCurrentDevice().systems.push({ id:genId(), nameAr:ar, nameEn:en, diagnosis:[], lessons:[] }); } saveFullData(); renderDiagnostics(); modal.remove(); } }; }
+    function deleteSystem(id){ if(confirm(t('delete'))){ getCurrentDevice().systems=getCurrentDevice().systems.filter(s=>s.id!==id); openSystems.delete(id); saveFullData(); renderDiagnostics(); } }
+    function removeDiagnosis(sysId,idx){ getCurrentDevice().systems.find(s=>s.id===sysId).diagnosis.splice(idx,1); saveFullData(); renderDiagnostics(); }
+    function openDiagModal(sysId){ let html=`<div class="modal"><div class="modal-content"><h3>${t('addDiagnosis')}</h3><input id="diagAr" placeholder="العيب بالعربية"><input id="diagEn" placeholder="Fault"><button id="saveDiag" class="btn-primary">${t('save')}</button><button class="closeModalBtn btn-sm btn-outline">${t('close')}</button></div></div>`; document.body.insertAdjacentHTML('beforeend',html); let modal=document.querySelector('.modal:last-child'); modal.querySelector('.closeModalBtn').onclick=()=>modal.remove(); document.getElementById('saveDiag').onclick=()=>{ let ar=document.getElementById('diagAr').value.trim(), en=document.getElementById('diagEn').value.trim(); if(ar&&en){ getCurrentDevice().systems.find(s=>s.id===sysId).diagnosis.push({ ar, en, steps:[] }); saveFullData(); renderDiagnostics(); modal.remove(); } }; }
+    function openStepsModal(sysId,diagIdx){ let sys=getCurrentDevice().systems.find(s=>s.id===sysId); let diag=sys.diagnosis[diagIdx]; let html=`<div class="modal"><div class="modal-content"><h3>${t('diagnosticSteps')}: ${escapeHtml(lang==='ar'?diag.ar:diag.en)}</h3><p class="text-accent">📌 ${t('easyToHard')}</p><div id="stepsList"></div><hr><div class="flex-between"><input id="stepAr" placeholder="خطوة بالعربية"><input id="stepEn" placeholder="Step"><button id="addStep" class="btn-sm btn-primary">+ ${t('addStep')}</button></div><button class="closeModalBtn btn-primary" style="margin-top:15px;">${t('close')}</button></div></div>`; document.body.insertAdjacentHTML('beforeend',html); let modal=document.querySelector('.modal:last-child'); function renderSteps(){ let container=document.getElementById('stepsList'); if(!diag.steps.length){ container.innerHTML=`<div class="empty-msg">🚫 لا توجد خطوات</div>`; return; } container.innerHTML=diag.steps.map((step,i)=>`<div class="step-row"><div><strong>${i+1}.</strong> ${escapeHtml(lang==='ar'?step.ar:step.en)}</div><div><button class="editStep" data-idx="${i}"><i class="fas fa-edit"></i></button><button class="delStep" data-idx="${i}"><i class="fas fa-trash"></i></button>${i>0?`<button class="upStep" data-idx="${i}"><i class="fas fa-arrow-up"></i></button>`:''}${i<diag.steps.length-1?`<button class="downStep" data-idx="${i}"><i class="fas fa-arrow-down"></i></button>`:''}</div></div>`).join(''); document.querySelectorAll('.editStep').forEach(btn=>btn.addEventListener('click',()=>{ let i=parseInt(btn.dataset.idx); let na=prompt("Arabic",diag.steps[i].ar), ne=prompt("English",diag.steps[i].en); if(na&&ne){ diag.steps[i].ar=na; diag.steps[i].en=ne; saveFullData(); renderSteps(); } })); document.querySelectorAll('.delStep').forEach(btn=>btn.addEventListener('click',()=>{ diag.steps.splice(parseInt(btn.dataset.idx),1); saveFullData(); renderSteps(); })); document.querySelectorAll('.upStep').forEach(btn=>btn.addEventListener('click',()=>{ let i=parseInt(btn.dataset.idx); [diag.steps[i],diag.steps[i-1]]=[diag.steps[i-1],diag.steps[i]]; saveFullData(); renderSteps(); })); document.querySelectorAll('.downStep').forEach(btn=>btn.addEventListener('click',()=>{ let i=parseInt(btn.dataset.idx); [diag.steps[i],diag.steps[i+1]]=[diag.steps[i+1],diag.steps[i]]; saveFullData(); renderSteps(); })); } document.getElementById('addStep').onclick=()=>{ let ar=document.getElementById('stepAr').value.trim(), en=document.getElementById('stepEn').value.trim(); if(ar&&en){ diag.steps.push({ar,en}); saveFullData(); renderSteps(); document.getElementById('stepAr').value=''; document.getElementById('stepEn').value=''; } }; modal.querySelector('.closeModalBtn').onclick=()=>modal.remove(); renderSteps(); }
+    function genId(){ return Date.now()+"-"+Math.random().toString(36); }
+    function openLessonModal(lessonData,sysId,editIdx=null){ let sys=getCurrentDevice().systems.find(s=>s.id===sysId); let lesson=(editIdx!==null)?sys.lessons[editIdx]:null; let isEdit=!!lesson; let html=`<div class="modal"><div class="modal-content"><h3>${isEdit?t('edit'):t('addLesson')}</h3><input id="titleAr" placeholder="العنوان عربي" value="${isEdit?escapeHtml(lesson.titleAr):''}"><input id="titleEn" placeholder="English Title" value="${isEdit?escapeHtml(lesson.titleEn):''}"><textarea id="contAr" rows="2" placeholder="المحتوى عربي">${isEdit?escapeHtml(lesson.contentAr):''}</textarea><textarea id="contEn" rows="2" placeholder="English Content">${isEdit?escapeHtml(lesson.contentEn):''}</textarea><input type="file" id="imgUp" accept="image/*"><div id="imgPrev">${isEdit&&lesson.image?`<img src="${lesson.image}" width="100%">`:''}</div><button id="saveLessonBtn" class="btn-primary">${t('save')}</button><button class="closeModalBtn btn-sm btn-outline">${t('close')}</button></div></div>`; document.body.insertAdjacentHTML('beforeend',html); let modal=document.querySelector('.modal:last-child'); let imgBase64=isEdit?lesson.image||'':''; document.getElementById('imgUp')?.addEventListener('change',e=>{ if(e.target.files[0]){ let r=new FileReader(); r.onload=ev=>{ imgBase64=ev.target.result; document.getElementById('imgPrev').innerHTML=`<img src="${imgBase64}" width="100%">`; }; r.readAsDataURL(e.target.files[0]); } }); document.getElementById('saveLessonBtn').onclick=()=>{ let titleAr=document.getElementById('titleAr').value, titleEn=document.getElementById('titleEn').value, contAr=document.getElementById('contAr').value, contEn=document.getElementById('contEn').value; if(!titleAr||!titleEn) return; let newLesson={ titleAr, titleEn, contentAr:contAr, contentEn:contEn, image:imgBase64 }; if(isEdit&&editIdx!==null) sys.lessons[editIdx]=newLesson; else sys.lessons.push(newLesson); saveFullData(); renderDiagnostics(); modal.remove(); }; modal.querySelector('.closeModalBtn').onclick=()=>modal.remove(); }
+    function deleteLesson(sysId,idx){ if(confirm(t('delete'))){ getCurrentDevice().systems.find(s=>s.id===sysId).lessons.splice(idx,1); saveFullData(); renderDiagnostics(); } }
+    function showLessonDetail(sysId,idx){ let lesson=getCurrentDevice().systems.find(s=>s.id===sysId).lessons[idx]; let title=lang==='ar'?lesson.titleAr:lesson.titleEn, content=lang==='ar'?lesson.contentAr:lesson.contentEn; let html=`<div class="modal"><div class="modal-content"><h3>${t('lessonDetails')}</h3><hr><h2 class="text-accent">${escapeHtml(title)}</h2>${lesson.image?`<img src="${lesson.image}" style="max-width:100%; border-radius:24px;">`:''}<p style="line-height:1.6;">${escapeHtml(content).replace(/\n/g,'<br>')}</p><hr><button class="closeModalBtn btn-primary">${t('close')}</button></div></div>`; document.body.insertAdjacentHTML('beforeend',html); document.querySelector('.modal .closeModalBtn').onclick=()=>document.querySelector('.modal')?.remove(); }
 
-        async function testGeminiConnection(apiKey, selectedModel) {
-            if (!apiKey || apiKey.trim() === "") return "no_key";
-            const testPrompt = "قل فقط: مرحبا، الاتصال ناجح.";
-            const result = await callGeminiAPIWithFallback(testPrompt, apiKey, selectedModel);
-            if (result.success) return "success";
-            if (result.error === "invalid_key") return "invalid_key";
-            if (result.error === "cors_error") return "cors_error";
-            return "failed";
-        }
+    function renderInvoices(){ let html=`<div class="card"><h3>${t('createInvoice')}</h3><input id="custName" placeholder="${t('customerName')}"><input id="custPhone" placeholder="${t('customerPhone')}"><select id="devType"><option value="phone">${t('phone')}</option><option value="laptop">${t('laptop')}</option><option value="tv">${t('tv')}</option></select><input id="model" placeholder="${t('deviceModel')}"><input id="fault" placeholder="${t('faultDesc')}"><input id="cost" placeholder="${t('repairCost')}" type="number"><button id="createInvBtn" class="btn-primary" style="width:100%">${t('createInvoice')}</button></div><h3>📋 ${t('invoices')}</h3>`; if(appData.invoices.length===0) html+=`<div class="card">${t('noInvoices')}</div>`; for(let inv of appData.invoices){ let deviceLabel=lang==='ar'?appData.devices.find(d=>d.id===inv.deviceType)?.nameAr:appData.devices.find(d=>d.id===inv.deviceType)?.nameEn; html+=`<div class="card"><div class="flex-between"><b>${escapeHtml(inv.customerName)}</b><span>${inv.status==='pending'?'🛠️ '+t('markReady'):'✅ '+t('markReady')}</span></div><div>${deviceLabel} | ${inv.deviceModel}</div><div>💰 ${inv.cost} SAR</div><div class="flex-between"><button class="printInvBtn btn-sm" data-id="${inv.id}"><i class="fas fa-print"></i> طباعة</button>${inv.status!=='ready'?`<button class="markReadyBtn btn-sm" data-id="${inv.id}"><i class="fab fa-whatsapp"></i> ${t('markReady')}</button>`:`<button class="sendWABtn btn-sm" data-phone="${inv.customerPhone}" data-name="${inv.customerName}"><i class="fab fa-whatsapp"></i> ${t('sendWhatsapp')}</button>`}</div></div>`; } document.getElementById("mainContent").innerHTML=html; document.getElementById("createInvBtn")?.addEventListener('click',()=>{ let name=document.getElementById('custName').value.trim(), phone=document.getElementById('custPhone').value.trim(); if(!name||!phone) return; appData.invoices.unshift({ id:genId(), customerName:name, customerPhone:phone, deviceType:document.getElementById('devType').value, deviceModel:document.getElementById('model').value, faultDesc:document.getElementById('fault').value, cost:document.getElementById('cost').value, status:"pending", date:new Date().toISOString() }); saveFullData(); renderInvoices(); }); document.querySelectorAll('.printInvBtn').forEach(btn=>btn.addEventListener('click',()=>printInvoice(btn.dataset.id))); document.querySelectorAll('.markReadyBtn').forEach(btn=>btn.addEventListener('click',()=>markInvoiceReady(btn.dataset.id))); document.querySelectorAll('.sendWABtn').forEach(btn=>btn.addEventListener('click',()=>sendWhatsApp(btn.dataset.phone,btn.dataset.name))); }
+    function markInvoiceReady(id){ let inv=appData.invoices.find(i=>i.id===id); if(inv){ inv.status="ready"; saveFullData(); renderInvoices(); sendWhatsApp(inv.customerPhone,inv.customerName); } }
+    function sendWhatsApp(phone,name){ let msg=`${lang==='ar'?`مرحباً ${name}، جهازك جاهز في iRepair AI`:`Hello ${name}, your device is ready at iRepair AI`}`; window.open(`https://wa.me/${phone.replace(/[^0-9+]/g,'')}?text=${encodeURIComponent(msg)}`); }
+    function printInvoice(id){ let inv=appData.invoices.find(i=>i.id===id); if(!inv) return; let win=window.open('','_blank'); win.document.write(`<html><head><title>Invoice</title><style>body{font-family:sans-serif;padding:20px}</style></head><body><div style="text-align:center"><h2>iRepair AI</h2><h3>${t('invoiceTitle')}</h3><hr><p><strong>${t('customerName')}:</strong> ${inv.customerName}<br><strong>${t('customerPhone')}:</strong> ${inv.customerPhone}<br><strong>${t('deviceModel')}:</strong> ${inv.deviceModel}<br><strong>${t('faultDesc')}:</strong> ${inv.faultDesc}<br><strong>${t('repairCost')}:</strong> ${inv.cost} SAR</p><hr><p>${new Date().toLocaleDateString()}</p></div></body></html>`); win.print(); win.close(); }
 
-        function openAIAssistant(deviceName, systemName, defaultText = "") {
-            const modalHtml = `
-                <div class="modal" id="aiModal">
-                    <div class="modal-content">
-                        <div class="flex-between"><h3><i class="fas fa-robot"></i> ${t('aiAssistant')} (${appData.shop.aiMode === "real" ? "Gemini AI" : t('smartMode')})</h3><button class="closeModalBtn btn-sm btn-outline">✖</button></div>
-                        <hr>
-                        <p><strong>${t('describeProblem')}</strong></p>
-                        <textarea id="aiProblem" rows="4" placeholder="${t('describeProblem')}">${escapeHtml(defaultText)}</textarea>
-                        <button id="askAIButton" class="btn-primary" style="width:100%; margin-top:10px;"><i class="fas fa-magic"></i> ${t('askAI')}</button>
-                        <div id="aiResult" class="ai-response" style="display:none;"></div>
-                    </div>
-                </div>
-            `;
-            document.body.insertAdjacentHTML('beforeend', modalHtml);
-            const modal = document.getElementById('aiModal');
-            const askBtn = document.getElementById('askAIButton');
-            const resultDiv = document.getElementById('aiResult');
-            const textarea = document.getElementById('aiProblem');
-            const closeModal = () => modal.remove();
-            modal.querySelectorAll('.closeModalBtn').forEach(btn => btn.addEventListener('click', closeModal));
-            askBtn.onclick = async () => {
-                let prob = textarea.value.trim();
-                if (!prob) { alert(lang === 'ar' ? "أدخل وصف المشكلة" : "Enter problem description"); return; }
-                resultDiv.style.display = "block";
-                resultDiv.innerHTML = `<i class="fas fa-spinner fa-pulse"></i> ${t('analyzing')}`;
-                let response = await getAIResponse(prob, deviceName, systemName);
-                resultDiv.innerHTML = response.replace(/\n/g, '<br>');
-            };
-        }
+    // ========== إعدادات التطبيق (تضيف خيارات الذكاء الاصطناعي الحقيقي) ==========
+    function renderSettings(){
+        let html=`<div class="card"><h3>${t('shopName')}</h3><input type="text" id="shopNameInput" value="iRepair AI" disabled><h3>${t('shopLogo')}</h3><input type="file" id="logoUpload" accept="image/*"><div id="logoPreview" style="margin:10px 0;">${appData.shop.logo?`<img src="${appData.shop.logo}" style="max-width:100px;border-radius:20px;">`:'<span class="text-accent">📷 لا يوجد شعار</span>'}</div><h3>${t('bgColor')}</h3><input type="color" id="bgColorPicker" value="${appData.shop.bgColor}"><h3>${t('splashBgColor')}</h3><input type="color" id="splashBgColorPicker" value="${appData.shop.splashBgColor}"><h3>${t('splashBgImage')}</h3><input type="file" id="splashBgUpload" accept="image/*"><div id="splashBgPreview" style="margin:10px 0;">${appData.shop.splashBgImage?`<img src="${appData.shop.splashBgImage}" style="max-width:100px;border-radius:20px;">`:'<span class="text-accent">🖼️ لا توجد صورة</span>'}</div><button id="removeSplashBg" class="btn-sm">🗑️ ${t('removeImage')}</button><hr><h3>${t('aiMode')}</h3><select id="aiModeSelect"><option value="smart" ${appData.shop.aiMode==='smart'?'selected':''}>${t('smartMode')}</option><option value="real" ${appData.shop.aiMode==='real'?'selected':''}>${t('realMode')}</option></select><div id="realSettings" style="${appData.shop.aiMode==='real'?'display:block':'display:none'}"><h3>${t('apiKey')}</h3><input type="password" id="geminiApiKey" placeholder="AIzaSy..." value="${appData.shop.geminiApiKey||''}"><h3>${t('model')}</h3><select id="geminiModel"><option value="gemini-1.5-flash">gemini-1.5-flash</option><option value="gemini-2.0-flash-exp" ${appData.shop.geminiModel==='gemini-2.0-flash-exp'?'selected':''}>gemini-2.0-flash-exp</option></select><button id="testApiBtn" class="btn-sm" style="margin-top:10px;">${t('testConnection')}</button><div class="info-box" style="margin-top:10px;"><i class="fas fa-info-circle"></i> ${lang==='ar'?'للحصول على مفتاح API مجاني: سجل في Google AI Studio (ai.google.dev) وأنشئ مفتاحاً.':'Get free API key from Google AI Studio.'}</div></div><button id="saveSettingsBtn" class="btn-primary" style="margin-top:20px;">${t('saveSettings')}</button></div><div class="card"><h3>${t('existingKnowledge')}</h3><div id="trainingsList" style="max-height:200px; overflow-y:auto;"></div><div class="info-box"><i class="fas fa-graduation-cap"></i> ${t('learnMore')}</div></div>`;
+        document.getElementById("mainContent").innerHTML=html;
+        function refreshTrainings(){ let listDiv=document.getElementById('trainingsList'); if(listDiv){ if(customTrainings.length===0) listDiv.innerHTML=`<div class="text-accent">📭 ${t('noTraining')}</div>`; else listDiv.innerHTML=customTrainings.map((t,i)=>`<div style="background:rgba(30,41,59,0.6); margin-bottom:8px; padding:8px; border-radius:16px;"><div><strong>❓ ${escapeHtml(t.question)}</strong></div><div>💡 ${escapeHtml(t.answer)}</div><button class="btn-sm delTrainingBtn" data-idx="${i}" style="margin-top:5px;">🗑️ ${t('deleteTraining')}</button></div>`).join(''); document.querySelectorAll('.delTrainingBtn').forEach(btn=>btn.addEventListener('click',()=>{ let idx=parseInt(btn.dataset.idx); customTrainings.splice(idx,1); saveTrainings(); refreshTrainings(); })); } }
+        refreshTrainings();
+        document.getElementById('logoUpload')?.addEventListener('change',e=>{ let file=e.target.files[0]; if(file){ let r=new FileReader(); r.onload=ev=>{ appData.shop.logo=ev.target.result; saveFullData(); updateHeaderLogo(); updateSplashLogo(); document.getElementById('logoPreview').innerHTML=`<img src="${ev.target.result}" style="max-width:100px;border-radius:20px;">`; }; r.readAsDataURL(file); } });
+        document.getElementById('bgColorPicker')?.addEventListener('input',e=>{ appData.shop.bgColor=e.target.value; applyBg(); });
+        document.getElementById('splashBgColorPicker')?.addEventListener('input',e=>{ appData.shop.splashBgColor=e.target.value; applySplashBg(); });
+        document.getElementById('splashBgUpload')?.addEventListener('change',e=>{ let file=e.target.files[0]; if(file){ let r=new FileReader(); r.onload=ev=>{ appData.shop.splashBgImage=ev.target.result; applySplashBg(); document.getElementById('splashBgPreview').innerHTML=`<img src="${ev.target.result}" style="max-width:100px;">`; saveFullData(); }; r.readAsDataURL(file); } });
+        document.getElementById('removeSplashBg')?.addEventListener('click',()=>{ appData.shop.splashBgImage=""; applySplashBg(); document.getElementById('splashBgPreview').innerHTML='<span class="text-accent">🖼️ لا توجد صورة</span>'; saveFullData(); });
+        document.getElementById('aiModeSelect')?.addEventListener('change',e=>{ appData.shop.aiMode=e.target.value; document.getElementById('realSettings').style.display=e.target.value==='real'?'block':'none'; saveFullData(); });
+        document.getElementById('geminiApiKey')?.addEventListener('input',e=>{ appData.shop.geminiApiKey=e.target.value; saveFullData(); });
+        document.getElementById('geminiModel')?.addEventListener('change',e=>{ appData.shop.geminiModel=e.target.value; saveFullData(); });
+        document.getElementById('testApiBtn')?.addEventListener('click',async()=>{ let key=document.getElementById('geminiApiKey').value.trim(); let model=document.getElementById('geminiModel').value; if(!key){ alert("أدخل المفتاح أولاً"); return; } let btn=document.getElementById('testApiBtn'); let orig=btn.innerHTML; btn.innerHTML=`<i class="fas fa-spinner fa-pulse"></i> ...`; btn.disabled=true; let res=await callGeminiReal("مرحباً، اختبر الاتصال فقط", key, model); btn.innerHTML=orig; btn.disabled=false; if(res.success) alert(t('connectionSuccess')); else alert(t('connectionFailed')); });
+        document.getElementById('saveSettingsBtn')?.addEventListener('click',()=>{ saveFullData(); renderSettings(); });
+    }
 
-        // ---------- دوال التشخيص والفواتير والإعدادات ----------
-        let currentView = "diagnostics";
-        let selectedDeviceId = "phone";
-        let openSystems = new Map();
-
-        function render() { if (isSplashVisible) return; if (currentView === "diagnostics") renderDiagnostics(); else if (currentView === "invoices") renderInvoices(); else renderSettings(); updateNav(); updateHeaderLogo(); }
-        function updateNav() {
-            document.querySelectorAll('.nav-btn').forEach(btn => {
-                let v = btn.dataset.view;
-                if (v === currentView) btn.classList.add('active'); else btn.classList.remove('active');
-                let span = btn.querySelector('span');
-                if (v === 'diagnostics') span.innerText = t('diagnostics');
-                else if (v === 'invoices') span.innerText = t('invoices');
-                else span.innerText = t('settings');
-            });
-        }
-
-        function renderDiagnostics() {
-            const container = document.getElementById("mainContent");
-            const selectedDev = appData.devices.find(d => d.id === selectedDeviceId);
-            let devicesHtml = `<div class="devices-grid">`;
-            for (let dev of appData.devices) {
-                let name = lang === 'ar' ? dev.nameAr : dev.nameEn;
-                let icon = dev.id === 'phone' ? '📱' : (dev.id === 'laptop' ? '💻' : '📺');
-                let active = selectedDeviceId === dev.id ? 'active' : '';
-                devicesHtml += `<div class="device-item ${active}" data-device="${dev.id}"><div class="device-icon">${icon}</div><div><div class="device-title">${escapeHtml(name)}</div><div class="device-count">${dev.systems.length} ${t('systemsCount')}</div></div></div>`;
-            }
-            devicesHtml += `</div>`;
-            let systemsHtml = `<div class="card"><div class="flex-between"><h2>${escapeHtml(lang==='ar'?selectedDev.nameAr:selectedDev.nameEn)} - ${t('systemsCount')}</h2><button id="addSystemBtn" class="btn-primary btn-sm">+ ${t('addSystem')}</button></div><hr><div class="systems-area">`;
-            if (selectedDev.systems.length === 0) systemsHtml += `<div class="empty-msg" style="text-align:center;padding:40px;">🚫 لا توجد منظومات</div>`;
-            else {
-                for (let sys of selectedDev.systems) {
-                    let sysName = lang==='ar'?sys.nameAr:sys.nameEn;
-                    let isOpen = openSystems.get(sys.id) || false;
-                    systemsHtml += `<div class="system-item" data-sys-id="${sys.id}"><div class="system-header"><div class="sys-name"><i class="fas fa-chevron-down chev ${isOpen?'rotate':''}"></i> ${escapeHtml(sysName)}</div><div class="sys-actions"><button class="editSysBtn" data-id="${sys.id}"><i class="fas fa-edit"></i> ${t('edit')}</button><button class="delSysBtn" data-id="${sys.id}"><i class="fas fa-trash"></i> ${t('delete')}</button></div></div><div class="system-body ${isOpen?'open':''}"><div><strong>🔍 ${t('diagnosisOptions')}</strong><div class="diagnosis-list">`;
-                    for (let d of sys.diagnosis) {
-                        let dText = lang==='ar'?d.ar:d.en;
-                        let idx = sys.diagnosis.indexOf(d);
-                        systemsHtml += `<div class="diag-badge" data-sys="${sys.id}" data-diagidx="${idx}">${escapeHtml(dText)} <i class="fas fa-stethoscope"></i> <button class="removeDiag" data-sys="${sys.id}" data-idx="${idx}" style="background:none;border:none;color:#f97316;"><i class="fas fa-times-circle"></i></button> <i class="fas fa-robot ai-badge-icon" style="margin-right:8px;color:#0ea5e9;cursor:pointer;"></i></div>`;
-                    }
-                    systemsHtml += `</div><button class="addDiagBtn btn-sm" data-sys="${sys.id}">+ ${t('addDiagnosis')}</button></div><div style="margin-top:20px;"><strong>📘 ${t('technicalLessons')}</strong> <button class="addLessonBtn btn-sm" data-sys="${sys.id}" style="float:left">+ ${t('addLesson')}</button><div style="clear:both"></div>`;
-                    for (let l of sys.lessons) {
-                        let title = lang==='ar'?l.titleAr:l.titleEn;
-                        let lIdx = sys.lessons.indexOf(l);
-                        systemsHtml += `<div class="lesson-card" data-sys="${sys.id}" data-lessonidx="${lIdx}" style="background:#13161f;border-radius:20px;padding:16px;margin:12px 0;cursor:pointer;"><div class="flex-between"><b>📘 ${escapeHtml(title)}</b><div><button class="editLessonBtn" data-sys="${sys.id}" data-idx="${lIdx}"><i class="fas fa-pen"></i></button><button class="delLessonBtn" data-sys="${sys.id}" data-idx="${lIdx}"><i class="fas fa-trash"></i></button></div></div><p style="color:#94a3b8;">${escapeHtml((lang==='ar'?l.contentAr:l.contentEn).substring(0,60))}...</p></div>`;
-                    }
-                    systemsHtml += `</div><div style="margin-top:15px;"><button class="btn-sm aiSystemBtn" data-device="${escapeHtml(lang==='ar'?selectedDev.nameAr:selectedDev.nameEn)}" data-system="${escapeHtml(sysName)}" style="background:#0ea5e9;color:#000;"><i class="fas fa-robot"></i> ${t('askAI')}</button></div></div></div>`;
-                }
-            }
-            systemsHtml += `</div></div>`;
-            container.innerHTML = devicesHtml + systemsHtml;
-            attachDiagnosticsEvents();
-        }
-
-        function attachDiagnosticsEvents() {
-            document.querySelectorAll('.device-item').forEach(el => el.addEventListener('click', () => { selectedDeviceId = el.dataset.device; openSystems.clear(); renderDiagnostics(); }));
-            document.querySelectorAll('.system-header').forEach(header => {
-                let item = header.closest('.system-item');
-                let sysId = item.dataset.sysId;
-                let body = item.querySelector('.system-body');
-                let chev = header.querySelector('.chev');
-                header.addEventListener('click', (e) => {
-                    if (e.target.closest('.editSysBtn') || e.target.closest('.delSysBtn')) return;
-                    let now = body.classList.toggle('open');
-                    if (chev) chev.classList.toggle('rotate', now);
-                    openSystems.set(sysId, now);
-                });
-            });
-            document.getElementById('addSystemBtn')?.addEventListener('click', () => openSystemModal(null));
-            document.querySelectorAll('.editSysBtn').forEach(btn => btn.addEventListener('click', (e) => { e.stopPropagation(); openSystemModal(btn.dataset.id); }));
-            document.querySelectorAll('.delSysBtn').forEach(btn => btn.addEventListener('click', (e) => { e.stopPropagation(); deleteSystem(btn.dataset.id); }));
-            document.querySelectorAll('.addDiagBtn').forEach(btn => btn.addEventListener('click', (e) => { e.stopPropagation(); openDiagModal(btn.dataset.sys); }));
-            document.querySelectorAll('.removeDiag').forEach(btn => btn.addEventListener('click', (e) => { e.stopPropagation(); removeDiagnosis(btn.dataset.sys, parseInt(btn.dataset.idx)); }));
-            document.querySelectorAll('.diag-badge').forEach(badge => {
-                badge.addEventListener('click', (e) => { if (e.target.classList.contains('removeDiag') || e.target.classList.contains('ai-badge-icon')) return; let sysId = badge.dataset.sys, diagIdx = parseInt(badge.dataset.diagidx); openStepsModal(sysId, diagIdx); });
-                let aiIcon = badge.querySelector('.ai-badge-icon');
-                if (aiIcon) aiIcon.addEventListener('click', (e) => { e.stopPropagation(); let sysId = badge.dataset.sys, diagIdx = parseInt(badge.dataset.diagidx); let sys = appData.devices.find(d=>d.id===selectedDeviceId).systems.find(s=>s.id===sysId); let diagText = lang==='ar'?sys.diagnosis[diagIdx].ar:sys.diagnosis[diagIdx].en; let deviceName = lang==='ar'?appData.devices.find(d=>d.id===selectedDeviceId).nameAr:appData.devices.find(d=>d.id===selectedDeviceId).nameEn; let systemName = lang==='ar'?sys.nameAr:sys.nameEn; openAIAssistant(deviceName, systemName, diagText); });
-            });
-            document.querySelectorAll('.aiSystemBtn').forEach(btn => btn.addEventListener('click', (e) => { e.stopPropagation(); openAIAssistant(btn.dataset.device, btn.dataset.system, ""); }));
-            document.querySelectorAll('.addLessonBtn').forEach(btn => btn.addEventListener('click', (e) => { e.stopPropagation(); openLessonModal(null, btn.dataset.sys); }));
-            document.querySelectorAll('.editLessonBtn').forEach(btn => btn.addEventListener('click', (e) => { e.stopPropagation(); openLessonModal({ sysId: btn.dataset.sys, idx: parseInt(btn.dataset.idx) }, btn.dataset.sys, parseInt(btn.dataset.idx)); }));
-            document.querySelectorAll('.delLessonBtn').forEach(btn => btn.addEventListener('click', (e) => { e.stopPropagation(); deleteLesson(btn.dataset.sys, parseInt(btn.dataset.idx)); }));
-            document.querySelectorAll('.lesson-card').forEach(card => card.addEventListener('click', (e) => { if (e.target.closest('.editLessonBtn') || e.target.closest('.delLessonBtn')) return; let sysId = card.dataset.sys, idx = parseInt(card.dataset.lessonidx); showLessonDetail(sysId, idx); }));
-        }
-
-        // دوال CRUD مختصرة (كما هي من قبل)
-        function getCurrentDevice() { return appData.devices.find(d => d.id === selectedDeviceId); }
-        function openSystemModal(sysId) {
-            let sys = sysId ? getCurrentDevice().systems.find(s => s.id === sysId) : null;
-            let isEdit = !!sys;
-            let html = `<div class="modal"><div class="modal-content"><h3>${isEdit ? t('edit') : t('addSystem')}</h3><input id="sysAr" placeholder="الاسم بالعربية" value="${isEdit ? escapeHtml(sys.nameAr) : ''}"><input id="sysEn" placeholder="Name" value="${isEdit ? escapeHtml(sys.nameEn) : ''}"><button id="saveSys" class="btn-primary">${t('save')}</button><button class="closeModalBtn btn-sm btn-outline">${t('close')}</button></div></div>`;
-            document.body.insertAdjacentHTML('beforeend', html);
-            const modal = document.querySelector('.modal:last-child');
-            modal.querySelector('.closeModalBtn').onclick = () => modal.remove();
-            document.getElementById('saveSys').onclick = () => { let ar = document.getElementById('sysAr').value.trim(), en = document.getElementById('sysEn').value.trim(); if (ar && en) { if (isEdit) { sys.nameAr = ar; sys.nameEn = en; } else { getCurrentDevice().systems.push({ id: genId(), nameAr: ar, nameEn: en, diagnosis: [], lessons: [] }); } saveData(); renderDiagnostics(); modal.remove(); } };
-        }
-        function deleteSystem(id) { if (confirm(t('delete'))) { getCurrentDevice().systems = getCurrentDevice().systems.filter(s => s.id !== id); openSystems.delete(id); saveData(); renderDiagnostics(); } }
-        function removeDiagnosis(sysId, idx) { getCurrentDevice().systems.find(s => s.id === sysId).diagnosis.splice(idx, 1); saveData(); renderDiagnostics(); }
-        function openDiagModal(sysId) {
-            let html = `<div class="modal"><div class="modal-content"><h3>${t('addDiagnosis')}</h3><input id="diagAr" placeholder="العيب بالعربية"><input id="diagEn" placeholder="Fault"><button id="saveDiag" class="btn-primary">${t('save')}</button><button class="closeModalBtn btn-sm btn-outline">${t('close')}</button></div></div>`;
-            document.body.insertAdjacentHTML('beforeend', html);
-            const modal = document.querySelector('.modal:last-child');
-            modal.querySelector('.closeModalBtn').onclick = () => modal.remove();
-            document.getElementById('saveDiag').onclick = () => { let ar = document.getElementById('diagAr').value.trim(), en = document.getElementById('diagEn').value.trim(); if (ar && en) { getCurrentDevice().systems.find(s => s.id === sysId).diagnosis.push({ ar, en, steps: [] }); saveData(); renderDiagnostics(); modal.remove(); } };
-        }
-        function openStepsModal(sysId, diagIdx) {
-            let sys = getCurrentDevice().systems.find(s => s.id === sysId);
-            let diag = sys.diagnosis[diagIdx];
-            let html = `<div class="modal"><div class="modal-content"><h3>${t('diagnosticSteps')}: ${escapeHtml(lang==='ar'?diag.ar:diag.en)}</h3><p class="text-accent">📌 ${t('easyToHard')}</p><div id="stepsList"></div><hr><div class="flex-between"><input id="stepAr" placeholder="خطوة بالعربية"><input id="stepEn" placeholder="Step"><button id="addStep" class="btn-sm btn-primary">+ ${t('addStep')}</button></div><button class="closeModalBtn btn-primary" style="margin-top:15px;">${t('close')}</button></div></div>`;
-            document.body.insertAdjacentHTML('beforeend', html);
-            const modal = document.querySelector('.modal:last-child');
-            function renderSteps() {
-                let container = document.getElementById('stepsList');
-                if (!diag.steps.length) { container.innerHTML = `<div class="empty-msg">🚫 لا توجد خطوات</div>`; return; }
-                container.innerHTML = diag.steps.map((step, i) => `<div class="step-row"><div><strong>${i+1}.</strong> ${escapeHtml(lang==='ar'?step.ar:step.en)}</div><div><button class="editStep" data-idx="${i}"><i class="fas fa-edit"></i></button><button class="delStep" data-idx="${i}"><i class="fas fa-trash"></i></button>${i>0?`<button class="upStep" data-idx="${i}"><i class="fas fa-arrow-up"></i></button>`:''}${i<diag.steps.length-1?`<button class="downStep" data-idx="${i}"><i class="fas fa-arrow-down"></i></button>`:''}</div></div>`).join('');
-                document.querySelectorAll('.editStep').forEach(btn => btn.addEventListener('click', () => { let i = parseInt(btn.dataset.idx); let na = prompt("Arabic", diag.steps[i].ar), ne = prompt("English", diag.steps[i].en); if (na && ne) { diag.steps[i].ar = na; diag.steps[i].en = ne; saveData(); renderSteps(); } }));
-                document.querySelectorAll('.delStep').forEach(btn => btn.addEventListener('click', () => { diag.steps.splice(parseInt(btn.dataset.idx), 1); saveData(); renderSteps(); }));
-                document.querySelectorAll('.upStep').forEach(btn => btn.addEventListener('click', () => { let i = parseInt(btn.dataset.idx); [diag.steps[i], diag.steps[i-1]] = [diag.steps[i-1], diag.steps[i]]; saveData(); renderSteps(); }));
-                document.querySelectorAll('.downStep').forEach(btn => btn.addEventListener('click', () => { let i = parseInt(btn.dataset.idx); [diag.steps[i], diag.steps[i+1]] = [diag.steps[i+1], diag.steps[i]]; saveData(); renderSteps(); }));
-            }
-            document.getElementById('addStep').onclick = () => { let ar = document.getElementById('stepAr').value.trim(), en = document.getElementById('stepEn').value.trim(); if (ar && en) { diag.steps.push({ ar, en }); saveData(); renderSteps(); document.getElementById('stepAr').value = ''; document.getElementById('stepEn').value = ''; } };
-            modal.querySelector('.closeModalBtn').onclick = () => modal.remove();
-            renderSteps();
-        }
-        function openLessonModal(lessonData, sysId, editIdx = null) {
-            let sys = getCurrentDevice().systems.find(s => s.id === sysId);
-            let lesson = (editIdx !== null) ? sys.lessons[editIdx] : null;
-            let isEdit = !!lesson;
-            let html = `<div class="modal"><div class="modal-content"><h3>${isEdit ? t('edit') : t('addLesson')}</h3><input id="titleAr" placeholder="العنوان عربي" value="${isEdit ? escapeHtml(lesson.titleAr) : ''}"><input id="titleEn" placeholder="English Title" value="${isEdit ? escapeHtml(lesson.titleEn) : ''}"><textarea id="contAr" rows="2" placeholder="المحتوى عربي">${isEdit ? escapeHtml(lesson.contentAr) : ''}</textarea><textarea id="contEn" rows="2" placeholder="English Content">${isEdit ? escapeHtml(lesson.contentEn) : ''}</textarea><input type="file" id="imgUp" accept="image/*"><div id="imgPrev">${isEdit && lesson.image ? `<img src="${lesson.image}" width="100%">` : ''}</div><button id="saveLessonBtn" class="btn-primary">${t('save')}</button><button class="closeModalBtn btn-sm btn-outline">${t('close')}</button></div></div>`;
-            document.body.insertAdjacentHTML('beforeend', html);
-            const modal = document.querySelector('.modal:last-child');
-            let imgBase64 = isEdit ? lesson.image || '' : '';
-            document.getElementById('imgUp')?.addEventListener('change', e => { if (e.target.files[0]) { let r = new FileReader(); r.onload = ev => { imgBase64 = ev.target.result; document.getElementById('imgPrev').innerHTML = `<img src="${imgBase64}" width="100%">`; }; r.readAsDataURL(e.target.files[0]); } });
-            document.getElementById('saveLessonBtn').onclick = () => {
-                let titleAr = document.getElementById('titleAr').value, titleEn = document.getElementById('titleEn').value, contAr = document.getElementById('contAr').value, contEn = document.getElementById('contEn').value;
-                if (!titleAr || !titleEn) return;
-                let newLesson = { titleAr, titleEn, contentAr: contAr, contentEn: contEn, image: imgBase64 };
-                if (isEdit && editIdx !== null) sys.lessons[editIdx] = newLesson;
-                else sys.lessons.push(newLesson);
-                saveData(); renderDiagnostics(); modal.remove();
-            };
-            modal.querySelector('.closeModalBtn').onclick = () => modal.remove();
-        }
-        function deleteLesson(sysId, idx) { if (confirm(t('delete'))) { getCurrentDevice().systems.find(s => s.id === sysId).lessons.splice(idx, 1); saveData(); renderDiagnostics(); } }
-        function showLessonDetail(sysId, idx) {
-            let lesson = getCurrentDevice().systems.find(s => s.id === sysId).lessons[idx];
-            let title = lang === 'ar' ? lesson.titleAr : lesson.titleEn, content = lang === 'ar' ? lesson.contentAr : lesson.contentEn;
-            let html = `<div class="modal"><div class="modal-content"><h3>${t('lessonDetails')}</h3><hr><h2 class="text-accent">${escapeHtml(title)}</h2>${lesson.image ? `<img src="${lesson.image}" style="max-width:100%; border-radius:24px;">` : ''}<p style="line-height:1.6;">${escapeHtml(content).replace(/\n/g, '<br>')}</p><hr><button class="closeModalBtn btn-primary">${t('close')}</button></div></div>`;
-            document.body.insertAdjacentHTML('beforeend', html);
-            document.querySelector('.modal .closeModalBtn').onclick = () => document.querySelector('.modal')?.remove();
-        }
-
-        // ---------- الفواتير والإعدادات ----------
-        function renderInvoices() {
-            let html = `<div class="card"><h3>${t('createInvoice')}</h3><input id="custName" placeholder="${t('customerName')}"><input id="custPhone" placeholder="${t('customerPhone')}"><select id="devType"><option value="phone">${t('phone')}</option><option value="laptop">${t('laptop')}</option><option value="tv">${t('tv')}</option></select><input id="model" placeholder="${t('deviceModel')}"><input id="fault" placeholder="${t('faultDesc')}"><input id="cost" placeholder="${t('repairCost')}" type="number"><button id="createInvBtn" class="btn-primary" style="width:100%">${t('createInvoice')}</button></div><h3>📋 ${t('invoices')}</h3>`;
-            if (appData.invoices.length === 0) html += `<div class="card">${t('noInvoices')}</div>`;
-            for (let inv of appData.invoices) {
-                let deviceLabel = lang === 'ar' ? appData.devices.find(d => d.id === inv.deviceType)?.nameAr : appData.devices.find(d => d.id === inv.deviceType)?.nameEn;
-                html += `<div class="card"><div class="flex-between"><b>${escapeHtml(inv.customerName)}</b><span>${inv.status === 'pending' ? '🛠️ ' + t('markReady') : '✅ ' + t('markReady')}</span></div><div>${deviceLabel} | ${inv.deviceModel}</div><div>💰 ${inv.cost} SAR</div><div class="flex-between"><button class="printInvBtn btn-sm" data-id="${inv.id}"><i class="fas fa-print"></i> طباعة</button>${inv.status !== 'ready' ? `<button class="markReadyBtn btn-sm" data-id="${inv.id}"><i class="fab fa-whatsapp"></i> ${t('markReady')}</button>` : `<button class="sendWABtn btn-sm" data-phone="${inv.customerPhone}" data-name="${inv.customerName}"><i class="fab fa-whatsapp"></i> ${t('sendWhatsapp')}</button>`}</div></div>`;
-            }
-            document.getElementById("mainContent").innerHTML = html;
-            document.getElementById("createInvBtn")?.addEventListener('click', () => {
-                let name = document.getElementById('custName').value.trim(), phone = document.getElementById('custPhone').value.trim();
-                if (!name || !phone) return alert("أدخل البيانات");
-                appData.invoices.unshift({ id: genId(), customerName: name, customerPhone: phone, deviceType: document.getElementById('devType').value, deviceModel: document.getElementById('model').value, faultDesc: document.getElementById('fault').value, cost: document.getElementById('cost').value, status: "pending", date: new Date().toISOString() });
-                saveData(); renderInvoices();
-            });
-            document.querySelectorAll('.printInvBtn').forEach(btn => btn.addEventListener('click', () => printInvoice(btn.dataset.id)));
-            document.querySelectorAll('.markReadyBtn').forEach(btn => btn.addEventListener('click', () => markInvoiceReady(btn.dataset.id)));
-            document.querySelectorAll('.sendWABtn').forEach(btn => btn.addEventListener('click', () => sendWhatsApp(btn.dataset.phone, btn.dataset.name)));
-        }
-        function markInvoiceReady(id) { let inv = appData.invoices.find(i => i.id === id); if (inv) { inv.status = "ready"; saveData(); renderInvoices(); sendWhatsApp(inv.customerPhone, inv.customerName); } }
-        function sendWhatsApp(phone, name) { let msg = `${lang === 'ar' ? `مرحباً ${name}، جهازك جاهز في iRepair AI Pro` : `Hello ${name}, your device is ready at iRepair AI Pro`}`; window.open(`https://wa.me/${phone.replace(/[^0-9+]/g, '')}?text=${encodeURIComponent(msg)}`); }
-        function printInvoice(id) { let inv = appData.invoices.find(i => i.id === id); if (!inv) return; let win = window.open('', '_blank'); win.document.write(`<html><head><title>Invoice</title><style>body{font-family:sans-serif;padding:20px}</style></head><body><div style="text-align:center"><h2>iRepair AI Pro</h2><h3>${t('invoiceTitle')}</h3><hr><p><strong>${t('customerName')}:</strong> ${inv.customerName}<br><strong>${t('customerPhone')}:</strong> ${inv.customerPhone}<br><strong>${t('deviceModel')}:</strong> ${inv.deviceModel}<br><strong>${t('faultDesc')}:</strong> ${inv.faultDesc}<br><strong>${t('repairCost')}:</strong> ${inv.cost} SAR</p><hr><p>${new Date().toLocaleDateString()}</p></div></body></html>`); win.print(); win.close(); }
-
-        function renderSettings() {
-            let html = `
-                <div class="card">
-                    <h3>${t('shopName')}</h3><input type="text" id="shopNameInput" value="iRepair AI Pro" disabled>
-                    <h3>${t('shopLogo')}</h3><input type="file" id="logoUpload" accept="image/*"><div id="logoPreview" style="margin:10px 0;">${appData.shop.logo ? `<img src="${appData.shop.logo}" style="max-width:100px;border-radius:20px;">` : '<span class="text-accent">📷 لا يوجد شعار</span>'}</div>
-                    <h3>${t('bgColor')}</h3><input type="color" id="bgColorPicker" value="${appData.shop.bgColor}">
-                    <h3>${t('splashBgColor')}</h3><input type="color" id="splashBgColorPicker" value="${appData.shop.splashBgColor}">
-                    <h3>${t('splashBgImage')}</h3><input type="file" id="splashBgUpload" accept="image/*"><div id="splashBgPreview" style="margin:10px 0;">${appData.shop.splashBgImage ? `<img src="${appData.shop.splashBgImage}" style="max-width:100px;border-radius:20px;">` : '<span class="text-accent">🖼️ لا توجد صورة</span>'}</div><button id="removeSplashBg" class="btn-sm">🗑️ ${t('removeImage')}</button>
-                    <hr>
-                    <h3>${t('aiMode')}</h3>
-                    <select id="aiModeSelect"><option value="smart" ${appData.shop.aiMode === 'smart' ? 'selected' : ''}>${t('smartMode')}</option><option value="real" ${appData.shop.aiMode === 'real' ? 'selected' : ''}>${t('realAI')}</option></select>
-                    <div id="apiKeyDiv" style="${appData.shop.aiMode === 'real' ? 'display:block' : 'display:none'}">
-                        <h3>${t('apiKey')}</h3>
-                        <input type="password" id="geminiApiKey" placeholder="AIzaSy..." value="${appData.shop.geminiApiKey || ''}">
-                        <h3>${t('selectModel')}</h3>
-                        <select id="modelSelect">
-                            <option value="auto" ${appData.shop.selectedModel === 'auto' ? 'selected' : ''}>${t('modelAuto')}</option>
-                            ${geminiModels.map(m => `<option value="${m}" ${appData.shop.selectedModel === m ? 'selected' : ''}>${m}</option>`).join('')}
-                        </select>
-                        <button id="testApiBtn" class="btn-sm" style="margin-top:10px;"><i class="fas fa-vial"></i> ${t('testConnection')}</button>
-                        <div class="info-box"><i class="fas fa-info-circle"></i> ${t('howToGetKey')}<br><small>${t('stepsToGetKey')}</small></div>
-                        <div class="info-box" style="background:#ffaa0020; border-color:#ffaa00;"><i class="fas fa-exclamation-triangle"></i> ${t('corsWarning')}</div>
-                    </div>
-                    <button id="saveSettingsBtn" class="btn-primary" style="margin-top:20px;">${t('saveSettings')}</button>
-                </div>
-                <div class="card"><h3><i class="fas fa-brain"></i> ${t('aiAssistant')}</h3><p>${lang === 'ar' ? 'يمكنك اختيار وضع المحاكاة الذكية (دون مفتاح) أو وضع Gemini API الحقيقي (يتطلب مفتاحاً مجانياً من Google AI Studio). للتشغيل المحلي، استخدم Live Server لتجنب مشاكل CORS.' : 'Choose Smart Simulation (no key) or Real Gemini API (requires free key from Google AI Studio). For local testing, use Live Server to avoid CORS issues.'}</p></div>
-            `;
-            document.getElementById("mainContent").innerHTML = html;
-            document.getElementById('logoUpload')?.addEventListener('change', e => { let file = e.target.files[0]; if (file) { let reader = new FileReader(); reader.onload = ev => { appData.shop.logo = ev.target.result; saveData(); updateHeaderLogo(); updateSplashLogo(); document.getElementById('logoPreview').innerHTML = `<img src="${ev.target.result}" style="max-width:100px;border-radius:20px;">`; }; reader.readAsDataURL(file); } });
-            document.getElementById('bgColorPicker')?.addEventListener('input', e => { appData.shop.bgColor = e.target.value; applyBg(); });
-            document.getElementById('splashBgColorPicker')?.addEventListener('input', e => { appData.shop.splashBgColor = e.target.value; applySplashBg(); });
-            document.getElementById('splashBgUpload')?.addEventListener('change', e => { let file = e.target.files[0]; if (file) { let reader = new FileReader(); reader.onload = ev => { appData.shop.splashBgImage = ev.target.result; applySplashBg(); if (document.getElementById('splashBgPreview')) document.getElementById('splashBgPreview').innerHTML = `<img src="${ev.target.result}" style="max-width:100px;">`; saveData(); }; reader.readAsDataURL(file); } });
-            document.getElementById('removeSplashBg')?.addEventListener('click', () => { appData.shop.splashBgImage = ""; applySplashBg(); if (document.getElementById('splashBgPreview')) document.getElementById('splashBgPreview').innerHTML = '<span class="text-accent">🖼️ لا توجد صورة</span>'; saveData(); });
-            document.getElementById('aiModeSelect')?.addEventListener('change', e => { appData.shop.aiMode = e.target.value; document.getElementById('apiKeyDiv').style.display = appData.shop.aiMode === 'real' ? 'block' : 'none'; saveData(); });
-            document.getElementById('modelSelect')?.addEventListener('change', e => { appData.shop.selectedModel = e.target.value; saveData(); });
-            document.getElementById('geminiApiKey')?.addEventListener('input', e => { appData.shop.geminiApiKey = e.target.value; saveData(); });
-            document.getElementById('testApiBtn')?.addEventListener('click', async () => {
-                const key = document.getElementById('geminiApiKey').value.trim();
-                const model = document.getElementById('modelSelect').value;
-                if (!key) { alert(lang === 'ar' ? "أدخل المفتاح أولاً" : "Enter the key first"); return; }
-                const btn = document.getElementById('testApiBtn');
-                const originalText = btn.innerHTML;
-                btn.innerHTML = `<i class="fas fa-spinner fa-pulse"></i> ...`;
-                btn.disabled = true;
-                const result = await testGeminiConnection(key, model);
-                btn.innerHTML = originalText;
-                btn.disabled = false;
-                if (result === "success") alert(t('connectionSuccess'));
-                else if (result === "invalid_key") alert(t('connectionFailed') + " " + (lang === 'ar' ? "مفتاح غير صالح." : "Invalid key."));
-                else if (result === "cors_error") alert(t('connectionFailed') + " " + (lang === 'ar' ? "خطأ CORS. استخدم Live Server." : "CORS error. Use Live Server."));
-                else alert(t('connectionFailed'));
-            });
-            document.getElementById('saveSettingsBtn')?.addEventListener('click', () => { saveData(); renderSettings(); });
-        }
-
-        function escapeHtml(str) { if (!str) return ''; return str.replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[m])); }
-        function toggleLang() { lang = lang === 'ar' ? 'en' : 'ar'; document.body.className = lang === 'ar' ? 'rtl' : 'ltr'; document.getElementById('langLabel').innerText = lang === 'ar' ? 'عربي' : 'EN'; document.getElementById('startBtn').innerText = lang === 'ar' ? 'ابدأ' : 'Start'; if (!isSplashVisible) render(); }
-        function init() { loadData(); updateSplashLogo(); updateHeaderLogo(); applySplashBg(); document.getElementById('langToggle').addEventListener('click', toggleLang); document.querySelectorAll('.nav-btn').forEach(btn => btn.addEventListener('click', () => { currentView = btn.dataset.view; if (!isSplashVisible) render(); })); if (!isSplashVisible) render(); }
-        init();
-    </script>
+    function escapeHtml(str){ if(!str) return ''; return str.replace(/[&<>]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[m])); }
+    function toggleLang(){ lang=lang==='ar'?'en':'ar'; document.body.className=lang==='ar'?'rtl':'ltr'; document.getElementById('langLabel').innerText=lang==='ar'?'عربي':'EN'; document.getElementById('startBtn').innerText=lang==='ar'?'ابدأ':'Start'; if(!isSplashVisible) render(); }
+    function init(){ loadFullData(); loadTrainings(); updateSplashLogo(); updateHeaderLogo(); applySplashBg(); document.getElementById('langToggle').addEventListener('click',toggleLang); document.querySelectorAll('.nav-btn').forEach(btn=>btn.addEventListener('click',()=>{ currentView=btn.dataset.view; if(!isSplashVisible) render(); })); if(!isSplashVisible) render(); }
+    init();
+</script>
 </body>
 </html>
