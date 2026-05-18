@@ -733,10 +733,11 @@
                     <div class="sidebar-logo-text truncate">iRepair AI Pro</div>
                     <div class="sidebar-logo-tagline truncate" data-i18n="tagline">Expert Electronics Repair</div>
                 </div>
+                <!-- Desktop Collapse Button Removed as requested -->
             </div>
         </div>
 
-        <!-- User Profile -->
+        <!-- User Profile (New Position) -->
         <div id="userProfile" class="p-4 border-b border-white/5 hidden">
             <div class="flex items-center gap-3">
                 <div class="relative">
@@ -806,23 +807,17 @@
             </div>
         </nav>
 
-        <div class="sidebar-footer p-4 border-t border-white/5 mt-auto">
-            <!-- NEW INSTALL BUTTON (hidden until beforeinstallprompt fires) -->
-            <div id="installAppBtn" class="nav-link mb-2 hidden">
-                <i class="fa-solid fa-download"></i>
-                <span class="nav-text" data-i18n="install_app">تثبيت التطبيق</span>
+            <div class="sidebar-footer p-4 border-t border-white/5 mt-auto">
+                <div class="nav-link mb-2" id="settingsBtn">
+                    <i class="fa-solid fa-sliders"></i>
+                    <span class="nav-text" data-i18n="settings">الإعدادات</span>
+                </div>
+                <div class="flex items-center gap-2 px-3 py-1 text-[10px] uppercase tracking-widest text-cyber/60">
+                    <div id="statusDot" class="w-1.5 h-1.5 rounded-full bg-cyber animate-pulse"></div>
+                    <span id="statusText">System Ready</span>
+                </div>
             </div>
-
-            <div class="nav-link mb-2" id="settingsBtn">
-                <i class="fa-solid fa-sliders"></i>
-                <span class="nav-text" data-i18n="settings">الإعدادات</span>
-            </div>
-            <div class="flex items-center gap-2 px-3 py-1 text-[10px] uppercase tracking-widest text-cyber/60">
-                <div id="statusDot" class="w-1.5 h-1.5 rounded-full bg-cyber animate-pulse"></div>
-                <span id="statusText">System Ready</span>
-            </div>
-        </div>
-    </aside>
+        </aside>
 
     <!-- Settings Modal -->
     <div id="settingsModal" class="modal-overlay">
@@ -899,6 +894,7 @@
                 <!-- Appearance Tab -->
                 <div class="tab-content hidden" id="tab-appearance">
                     <div class="space-y-6">
+
                         <div>
                             <label class="block text-sm font-bold text-gray-300 mb-2">Theme Color</label>
                             <div class="flex items-center gap-4">
@@ -1107,7 +1103,7 @@
                 <div id="aiAvatarBox" class="avatar-glow-box avatar-idle relative w-48 h-48 rounded-full bg-darkBg border-2 border-cyber/30 flex items-center justify-center overflow-hidden">
                     <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(0,243,255,0.1)_0%,transparent_70%)]"></div>
                     <div class="absolute inset-0 opacity-20" style="background-image: radial-gradient(#00f3ff 1px, transparent 1px); background-size: 10px 10px;"></div>
-                    <!-- Animated Futuristic Cyber-Technician Robot -->
+                    <!-- Animated Futuristic Cyber-Technician Robot (No External Image Needed!) -->
                     <div id="avatarSVGContainer" class="w-full h-full p-4 z-10 flex items-center justify-center">
                         <svg id="avatarSVG" class="w-36 h-36 drop-shadow-[0_0_20px_rgba(0,243,255,0.6)]" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
                             <!-- Pulse background -->
@@ -1839,8 +1835,7 @@
                 tab_ai: "محرك الذكاء الاصطناعي",
                 tab_appearance: "المظهر",
                 tab_backup: "النسخ الاحتياطي",
-                tab_language: "اللغة",
-                install_app: "تثبيت التطبيق"
+                tab_language: "اللغة"
             },
             en: {
                 login_title: "Sign In",
@@ -1893,8 +1888,7 @@
                 tab_ai: "AI Engine",
                 tab_appearance: "Appearance",
                 tab_backup: "Backup & Sync",
-                tab_language: "Language",
-                install_app: "Install App"
+                tab_language: "Language"
             }
         };
 
@@ -2191,6 +2185,8 @@
             deviceChartContainer: document.getElementById('deviceChartContainer'),
             topBrandsList: document.getElementById('topBrandsList'),
             // Theming
+            // Appearance
+
             themeColorInput: document.getElementById('themeColorInput'),
             resetThemeBtn: document.getElementById('resetThemeBtn'),
             // Library
@@ -2229,37 +2225,8 @@
             userName: document.getElementById('userName'),
             userEmail: document.getElementById('userEmail'),
             syncStatus: document.getElementById('syncStatus'),
-            logoutBtn: document.getElementById('logoutBtn'),
-            // PWA Install
-            installAppBtn: document.getElementById('installAppBtn')
+            logoutBtn: document.getElementById('logoutBtn')
         };
-
-        // PWA Install Logic
-        let deferredPrompt = null;
-
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            if (D.installAppBtn) {
-                D.installAppBtn.classList.remove('hidden');
-            }
-        });
-
-        if (D.installAppBtn) {
-            D.installAppBtn.addEventListener('click', async () => {
-                if (!deferredPrompt) return;
-                deferredPrompt.prompt();
-                const { outcome } = await deferredPrompt.userChoice;
-                console.log(`User response to install prompt: ${outcome}`);
-                deferredPrompt = null;
-                D.installAppBtn.classList.add('hidden');
-            });
-        }
-
-        // Detect if already installed (standalone mode) and hide button
-        if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone) {
-            if (D.installAppBtn) D.installAppBtn.classList.add('hidden');
-        }
 
         // --- Initialization ---
         function init() {
@@ -2268,6 +2235,7 @@
             if (savedTheme) {
                 state.themeColor = savedTheme;
                 D.html.style.setProperty('--color-cyber', savedTheme);
+                // Also calculate a darker shade for gradients (approximate by dimming RGB)
                 const rgb = savedTheme.split(',').map(n => Math.max(0, parseInt(n.trim()) - 50));
                 D.html.style.setProperty('--color-cyber-dark', rgb.join(', '));
                 D.themeColorInput.value = rgbToHex(savedTheme);
@@ -2291,6 +2259,8 @@
 
             const savedLogo = localStorage.getItem('iRepair_Logo');
             if (savedLogo) { state.customLogo = savedLogo; }
+
+
 
             // Restore Cloud State
             const savedCloudUser = localStorage.getItem('iRepair_Cloud_User');
@@ -2701,6 +2671,8 @@
 
         }
 
+
+
         function openSettingsModal() {
             D.settingsModal.classList.add('active');
             // Sync values to modal inputs
@@ -2793,9 +2765,11 @@
             }, 50);
 
             if (role === 'ai' && text && typeof voiceSystem !== 'undefined') {
-                voiceSystem.speak(text);
-                if (voiceSystem.elements.transcriptArea) {
-                    voiceSystem.elements.transcriptArea.innerHTML = text;
+                if (state.currentView === 'voice') {
+                    voiceSystem.speak(text);
+                    if (voiceSystem.elements.transcriptArea) {
+                        voiceSystem.elements.transcriptArea.innerHTML = text;
+                    }
                 }
             }
         }
