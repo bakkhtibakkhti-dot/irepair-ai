@@ -2349,9 +2349,6 @@
                 }
                 
                 if (D.resetLogoBtn) D.resetLogoBtn.classList.remove('hidden');
-                if (D.logoFileName && D.logoFileName.textContent === i18n[state.lang].choose_logo) {
-                    D.logoFileName.textContent = state.lang === 'ar' ? 'تم رفع الشعار المخصص' : 'Custom logo loaded';
-                }
             } else {
                 if (D.sidebarLogoIcon && D.sidebarLogoImg) {
                     D.sidebarLogoIcon.classList.remove('hidden');
@@ -3351,17 +3348,58 @@
                 localStorage.setItem('iRepair_Theme', defaultRgb);
             });
 
-            // Custom Logo Upload Handling
+            // Custom Logo Upload Handling with Auto-Resizing & Compression
             if (D.logoUploadInput) {
                 D.logoUploadInput.addEventListener('change', (e) => {
                     const file = e.target.files[0];
                     if (file) {
                         const reader = new FileReader();
                         reader.onload = (event) => {
-                            state.customLogo = event.target.result;
-                            localStorage.setItem('iRepair_Logo', state.customLogo);
-                            if (D.logoFileName) D.logoFileName.textContent = file.name;
-                            updateUI();
+                            const img = new Image();
+                            img.onload = () => {
+                                // Create a Canvas to downscale and compress the logo
+                                const canvas = document.createElement('canvas');
+                                const ctx = canvas.getContext('2d');
+                                
+                                // Set target logo size (256x256 is perfect for high-res sidebar and print logos)
+                                const maxDim = 256;
+                                let width = img.width;
+                                let height = img.height;
+                                
+                                // Maintain original aspect ratio
+                                if (width > height) {
+                                    if (width > maxDim) {
+                                        height = Math.round((height * maxDim) / width);
+                                        width = maxDim;
+                                    }
+                                } else {
+                                    if (height > maxDim) {
+                                        width = Math.round((width * maxDim) / height);
+                                        height = maxDim;
+                                    }
+                                }
+                                
+                                canvas.width = width;
+                                canvas.height = height;
+                                
+                                // Draw to canvas cleanly
+                                ctx.clearRect(0, 0, width, height);
+                                ctx.drawImage(img, 0, 0, width, height);
+                                
+                                // Export as compressed JPEG to keep size under 30KB
+                                const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.85);
+                                
+                                try {
+                                    state.customLogo = compressedDataUrl;
+                                    localStorage.setItem('iRepair_Logo', state.customLogo);
+                                    if (D.logoFileName) D.logoFileName.textContent = file.name;
+                                    updateUI();
+                                } catch (quotaError) {
+                                    console.error("Failed to save logo:", quotaError);
+                                    alert(state.lang === 'ar' ? 'فشل حفظ الشعار بسبب الحجم الكبير!' : 'Failed to save logo: Image is too large!');
+                                }
+                            };
+                            img.src = event.target.result;
                         };
                         reader.readAsDataURL(file);
                     }
