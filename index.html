@@ -4163,6 +4163,23 @@
                 this.bindEvents();
                 this.loadSettings();
                 this.patchHandleSend();
+
+                // Global first-interaction unlocker to guarantee voice synthesis works on all platforms
+                const unlock = () => {
+                    if (this.speechSynthesis) {
+                        try {
+                            const utterance = new SpeechSynthesisUtterance('');
+                            utterance.volume = 0;
+                            this.speechSynthesis.speak(utterance);
+                        } catch(e) {}
+                    }
+                    document.removeEventListener('click', unlock);
+                    document.removeEventListener('keydown', unlock);
+                    document.removeEventListener('touchstart', unlock);
+                };
+                document.addEventListener('click', unlock);
+                document.addEventListener('keydown', unlock);
+                document.addEventListener('touchstart', unlock);
             },
 
             setupSpeechRecognition() {
