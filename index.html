@@ -3082,6 +3082,41 @@
 
                 if (aiText) {
                     appendMessage('ai', aiText);
+                    // Render any tool (web‑search) results returned by Gemini
+                    if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts) {
+                        const parts = data.candidates[0].content.parts;
+                        // Look for a part that contains a tool response (Google search)
+                        const toolPart = parts.find(p => p.toolResponse);
+                        if (toolPart && toolPart.toolResponse && toolPart.toolResponse.searchResults) {
+                            const results = toolPart.toolResponse.searchResults;
+                            // Create a container for the results
+                            const resultContainer = document.createElement('div');
+                            resultContainer.className = 'mt-4 space-y-3';
+                            results.forEach(r => {
+                                const card = document.createElement('div');
+                                card.className = 'glass-panel p-3 rounded-xl border border-cyber/30 hover:border-cyber/60 transition';
+                                const title = r.title || r.displayLink || r.url;
+                                const snippet = r.snippet || '';
+                                const url = r.url || '#';
+                                card.innerHTML = `
+                                    <div class="flex items-center space-x-2 mb-1">
+                                        <i class="fa-solid fa-magnifying-glass text-cyber"></i>
+                                        <a href="${url}" target="_blank" class="text-sm font-bold text-cyber underline">${title}</a>
+                                    </div>
+                                    <p class="text-xs text-gray-300">${snippet}</p>
+                                `;
+                                resultContainer.appendChild(card);
+                            });
+                            // Insert after the last AI message in the chat container
+                            const lastAiMsg = document.querySelector('#chatContainer .message.ai:last-child');
+                            if (lastAiMsg) {
+                                lastAiMsg.parentNode.insertBefore(resultContainer, lastAiMsg.nextSibling);
+                            } else {
+                                D.chatContainer.appendChild(resultContainer);
+                            }
+                        }
+                    }
+                    updateContextWindow(userMessageObj, aiMessageObj);
                     updateContextWindow(userMessageObj, aiMessageObj);
 
                     // Auto-Save Chat Logic
