@@ -4381,23 +4381,26 @@
 
                 const utterance = new SpeechSynthesisUtterance(cleanText);
                 
+                const isArabic = /[\u0600-\u06FF]/.test(cleanText);
+                const targetLang = isArabic ? 'ar' : 'en';
+
                 if (this.elements.voiceSelect) {
                     const selectedVoiceName = this.elements.voiceSelect.value;
                     let voice = this.voices.find(v => v.name === selectedVoiceName);
-                    if (!voice) {
-                        voice = this.voices.find(v => v.lang.startsWith('ar'));
+                    if (!voice || !voice.lang.startsWith(targetLang)) {
+                        voice = this.voices.find(v => v.lang.startsWith(targetLang));
                     }
                     if (voice) {
                         utterance.voice = voice;
                     }
                 } else {
-                    const voice = this.voices.find(v => v.lang.startsWith('ar'));
+                    const voice = this.voices.find(v => v.lang.startsWith(targetLang));
                     if (voice) utterance.voice = voice;
                 }
                 
                 utterance.rate = parseFloat(this.elements.voiceRate ? this.elements.voiceRate.value : 1) || 1;
                 utterance.pitch = parseFloat(this.elements.voicePitch ? this.elements.voicePitch.value : 1) || 1;
-                utterance.lang = utterance.voice ? utterance.voice.lang : 'ar-SA';
+                utterance.lang = utterance.voice ? utterance.voice.lang : (isArabic ? 'ar-SA' : 'en-US');
 
                 utterance.onstart = () => {
                     this.isSpeaking = true;
@@ -4413,6 +4416,15 @@
                     console.error('Speech synthesis error', e);
                     this.isSpeaking = false;
                     this.updateAvatarState('idle', '<i class="fa-solid fa-circle-check mr-1"></i> System Online');
+                    if (this.elements.transcriptArea) {
+                        let errorMsg = 'حدث خطأ في محرك نطق الصوت.';
+                        if (e.error === 'language-unavailable') {
+                            errorMsg = 'جهازك لا يدعم نطق هذه اللغة (يرجى تثبيت حزمة اللغة العربية/الإنجليزية في إعدادات نظام تشغيلك).';
+                        } else if (e.error === 'network') {
+                            errorMsg = 'تحتاج لاتصال بالإنترنت لنطق الصوت على هذا المتصفح.';
+                        }
+                        this.elements.transcriptArea.innerHTML = `<span class="text-red-500 text-sm font-bold"><i class="fa-solid fa-triangle-exclamation"></i> خطأ صوتي: ${errorMsg}</span>`;
+                    }
                 };
 
                 this.speechSynthesis.speak(utterance);
@@ -4475,7 +4487,8 @@
                     }
                 } else {
                     // Show avatar when not idle
-                    if (this.elements.avatarArea && this.elements.avatarToggle && this.elements.avatarToggle.checked) {
+                    const isAvatarEnabled = this.elements.avatarToggle ? this.elements.avatarToggle.checked : (localStorage.getItem('ai_avatar_enabled') !== 'false');
+                    if (this.elements.avatarArea && isAvatarEnabled) {
                         this.elements.avatarArea.classList.remove('hidden');
                         setTimeout(() => this.elements.avatarArea.classList.add('opacity-100'), 10);
                     }
