@@ -2294,8 +2294,50 @@
             setupLibraryLogic();
         }
 
+        // --- PWA Icons & Manifest Dynamic Sync ---
+        function updatePWAIcons(logoUrl) {
+            const finalLogo = logoUrl || 'cyborg_engineer.png';
+            
+            // 1. Update the inline PWA manifest
+            const manifestObj = {
+                name: "iRepair AI Pro",
+                short_name: "iRepair AI",
+                start_url: ".",
+                display: "standalone",
+                background_color: "#02050a",
+                theme_color: "#00f3ff",
+                icons: [
+                    {
+                        src: finalLogo,
+                        sizes: "512x512",
+                        type: "image/png"
+                    }
+                ]
+            };
+            const manifestStr = encodeURIComponent(JSON.stringify(manifestObj));
+            let manifestLink = document.querySelector('link[rel="manifest"]');
+            if (manifestLink) {
+                manifestLink.href = 'data:application/manifest+json,' + manifestStr;
+            }
+            
+            // 2. Update Browser Favicon
+            let faviconLink = document.querySelector('link[rel="icon"]');
+            if (faviconLink) {
+                faviconLink.href = finalLogo;
+            }
+            
+            // 3. Update Apple Touch Icon (iOS Home Screen)
+            let appleTouchLink = document.querySelector('link[rel="apple-touch-icon"]');
+            if (appleTouchLink) {
+                appleTouchLink.href = finalLogo;
+            }
+        }
+
         // --- UI Updates ---
         function updateUI() {
+            // Update manifest and favicons dynamically
+            updatePWAIcons(state.customLogo);
+
             // Apply language
             D.html.setAttribute('dir', state.lang === 'ar' ? 'rtl' : 'ltr');
             D.html.setAttribute('lang', state.lang);
@@ -3386,8 +3428,8 @@
                                 ctx.clearRect(0, 0, width, height);
                                 ctx.drawImage(img, 0, 0, width, height);
                                 
-                                // Export as compressed JPEG to keep size under 30KB
-                                const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.85);
+                                // Export as PNG to preserve transparency and shape
+                                const compressedDataUrl = canvas.toDataURL('image/png');
                                 
                                 try {
                                     state.customLogo = compressedDataUrl;
