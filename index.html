@@ -2709,6 +2709,13 @@
             setTimeout(() => {
                 D.chatContainer.scrollTop = D.chatContainer.scrollHeight;
             }, 50);
+
+            if (role === 'ai' && text && typeof voiceSystem !== 'undefined') {
+                voiceSystem.speak(text);
+                if (voiceSystem.elements.transcriptArea) {
+                    voiceSystem.elements.transcriptArea.innerHTML = text;
+                }
+            }
         }
 
         function renderHistory() {
@@ -4155,7 +4162,6 @@
                 this.setupSpeechSynthesis();
                 this.bindEvents();
                 this.loadSettings();
-                this.patchAppendMessage();
                 this.patchHandleSend();
             },
 
@@ -4517,28 +4523,6 @@
                         }
                     }
                 }
-            },
-
-            patchAppendMessage() {
-                // Wait for the main script to load window.appendMessage if it's not ready
-                const tryPatch = () => {
-                    if (typeof window.appendMessage === 'function' && !window.appendMessage._patched) {
-                        const origAppendMessage = window.appendMessage;
-                        window.appendMessage = function(role, text, imageSrc) {
-                            origAppendMessage.apply(this, arguments);
-                            if (role === 'ai' && text) {
-                                voiceSystem.speak(text);
-                                if (voiceSystem.elements.transcriptArea) {
-                                    voiceSystem.elements.transcriptArea.innerHTML = text;
-                                }
-                            }
-                        };
-                        window.appendMessage._patched = true;
-                    } else {
-                        setTimeout(tryPatch, 500);
-                    }
-                };
-                tryPatch();
             },
 
             patchHandleSend() {
