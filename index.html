@@ -2349,6 +2349,9 @@
                 }
                 
                 if (D.resetLogoBtn) D.resetLogoBtn.classList.remove('hidden');
+                if (D.logoFileName && D.logoFileName.textContent === i18n[state.lang].choose_logo) {
+                    D.logoFileName.textContent = state.lang === 'ar' ? 'تم رفع الشعار المخصص' : 'Custom logo loaded';
+                }
             } else {
                 if (D.sidebarLogoIcon && D.sidebarLogoImg) {
                     D.sidebarLogoIcon.classList.remove('hidden');
@@ -3347,6 +3350,33 @@
                 D.html.style.setProperty('--color-cyber-dark', '0, 151, 178');
                 localStorage.setItem('iRepair_Theme', defaultRgb);
             });
+
+            // Custom Logo Upload Handling
+            if (D.logoUploadInput) {
+                D.logoUploadInput.addEventListener('change', (e) => {
+                    const file = e.target.files[0];
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = (event) => {
+                            state.customLogo = event.target.result;
+                            localStorage.setItem('iRepair_Logo', state.customLogo);
+                            if (D.logoFileName) D.logoFileName.textContent = file.name;
+                            updateUI();
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                });
+            }
+
+            if (D.resetLogoBtn) {
+                D.resetLogoBtn.addEventListener('click', () => {
+                    state.customLogo = null;
+                    localStorage.removeItem('iRepair_Logo');
+                    if (D.logoFileName) D.logoFileName.textContent = i18n[state.lang].choose_logo;
+                    if (D.logoUploadInput) D.logoUploadInput.value = '';
+                    updateUI();
+                });
+            }
 
             // Modals
             D.closeLibViewBtn.addEventListener('click', () => {
