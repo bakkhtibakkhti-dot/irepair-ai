@@ -4337,7 +4337,7 @@
 
             startListening() {
                 // Unlock speech synthesis on direct user interaction
-                if (this.speechSynthesis && this.voices.length > 0) {
+                if (this.speechSynthesis) {
                     const unlockMsg = new SpeechSynthesisUtterance('');
                     unlockMsg.volume = 0;
                     this.speechSynthesis.speak(unlockMsg);
@@ -4368,6 +4368,11 @@
                 if (localStorage.getItem('ai_voice_enabled') === 'false') return;
                 if (this.elements.voiceToggle && !this.elements.voiceToggle.checked) return;
                 
+                // Force-update voices in case they loaded late without triggering events
+                if (this.speechSynthesis) {
+                    this.voices = this.speechSynthesis.getVoices();
+                }
+                
                 this.stopSpeaking();
                 
                 // Strip markdown, asterisks, and HTML for clean speech
@@ -4378,7 +4383,15 @@
                 
                 if (this.elements.voiceSelect) {
                     const selectedVoiceName = this.elements.voiceSelect.value;
-                    const voice = this.voices.find(v => v.name === selectedVoiceName);
+                    let voice = this.voices.find(v => v.name === selectedVoiceName);
+                    if (!voice) {
+                        voice = this.voices.find(v => v.lang.startsWith('ar'));
+                    }
+                    if (voice) {
+                        utterance.voice = voice;
+                    }
+                } else {
+                    const voice = this.voices.find(v => v.lang.startsWith('ar'));
                     if (voice) utterance.voice = voice;
                 }
                 
