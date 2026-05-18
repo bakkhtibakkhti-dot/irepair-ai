@@ -4164,12 +4164,13 @@
                 if (SpeechRecognition) {
                     this.recognition = new SpeechRecognition();
                     this.recognition.lang = 'ar-SA';
-                    this.recognition.continuous = true;
+                    this.recognition.continuous = false;
                     this.recognition.interimResults = true;
 
                     this.recognition.onstart = () => {
                         this.isListening = true;
-                        this.baseTranscript = this.elements.msgInput.value;
+                        this.baseTranscript = '';
+                        this.elements.msgInput.value = '';
                         this.updateMicUI(true);
                         this.updateAvatarState('listening', '<i class="fa-solid fa-ear-listen mr-1"></i> Listening...');
                         this.stopSpeaking();
@@ -4364,6 +4365,7 @@
             },
 
             speak(text) {
+                if (localStorage.getItem('ai_voice_enabled') === 'false') return;
                 if (this.elements.voiceToggle && !this.elements.voiceToggle.checked) return;
                 
                 this.stopSpeaking();
@@ -4404,9 +4406,9 @@
             },
 
             stopSpeaking() {
-                if (this.speechSynthesis.speaking) {
+                try {
                     this.speechSynthesis.cancel();
-                }
+                } catch(e) {}
                 this.isSpeaking = false;
             },
 
