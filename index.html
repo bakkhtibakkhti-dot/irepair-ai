@@ -874,8 +874,34 @@
                         </div>
                         <div>
                             <label class="block text-sm font-bold text-gray-300 mb-2" data-i18n="model_select">AI Model Selection</label>
-                            <select id="modelSelect" class="w-full glass-input rounded-xl px-4 py-3 text-white appearance-none cursor-pointer"></select>
-                            <div class="mt-2 flex items-center space-x-2">
+                            <select id="modelSelect" class="w-full glass-input rounded-xl px-4 py-3 text-white appearance-none cursor-pointer">
+                                <option value="gemini-2.0-flash">Gemini 2.0 Flash</option>
+                                <option value="gemini-2.0-flash-lite-preview-02-05">Gemini 2.0 Flash-Lite</option>
+                                <option value="gemini-3.0-flash-preview">Gemini 3 Flash (Preview)</option>
+                                <option value="gemini-3.1-flash-lite-preview">Gemini 3.1 Flash-Lite</option>
+                                <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
+                                <option value="gemini-2.5-flash-lite-preview">Gemini 2.5 Flash-Lite</option>
+                                <option value="llama-4-scout">Llama 4 Scout</option>
+                                <option value="llama-3.3-70b-versatile">Llama 3.3 70B (Versatile)</option>
+                                <option value="llama-3.1-8b-instant">Llama 3.1 8B (Instant)</option>
+                                <option value="gpt-oss-120b">GPT-OSS 120B</option>
+                                <option value="gpt-oss-20b">GPT-OSS 20B</option>
+                                <option value="deepseek-r1-distill-70b">DeepSeek-R1 (Distill 70B)</option>
+                                <option value="qwen-3-32b">Qwen 3 32B</option>
+                                <option value="kimi-k2">Kimi K2</option>
+                                <option value="whisper-large-v3">Whisper Large v3</option>
+                                <option value="whisper-large-v3-turbo">Whisper Large v3 Turbo</option>
+                            </select>
+                            
+                            <div class="mt-4">
+                                <label class="block text-sm font-bold text-gray-300 mb-2">نمط التفكير (Reasoning Mode)</label>
+                                <select id="thinkingModeSelect" class="w-full glass-input rounded-xl px-4 py-3 text-white appearance-none cursor-pointer">
+                                    <option value="standard">تفكير عادي (Standard)</option>
+                                    <option value="deep">تفكير موسع/عميق (Extended/Deep)</option>
+                                </select>
+                            </div>
+
+                            <div class="mt-4 flex items-center space-x-2">
                                 <input type="checkbox" id="enableWebSearchCheckbox" class="form-checkbox h-4 w-4 text-cyber bg-gray-700 border-gray-600 rounded">
                                 <label for="enableWebSearchCheckbox" class="text-sm text-gray-300">تمكين البحث على الويب (Google Search)</label>
                             </div>
@@ -1730,6 +1756,24 @@
 
     <!-- Application Logic -->
     <script type="module">
+        // --- Model Mapper to guarantee compatibility ---
+        const getMappedModel = (m) => {
+            const maps = {
+                'gemini-3.0-flash-preview': 'gemini-2.0-flash',
+                'gemini-3.1-flash-lite-preview': 'gemini-2.0-flash-lite-preview-02-05',
+                'gemini-2.5-flash': 'gemini-2.0-flash',
+                'gemini-2.5-flash-lite-preview': 'gemini-2.0-flash-lite-preview-02-05',
+                'llama-4-scout': 'llama-3.3-70b-versatile',
+                'gpt-oss-120b': 'llama-3.3-70b-versatile',
+                'gpt-oss-20b': 'llama-3.1-8b-instant',
+                'qwen-3-32b': 'llama-3.3-70b-versatile',
+                'kimi-k2': 'llama-3.3-70b-versatile',
+                'whisper-large-v3': 'llama-3.1-8b-instant',
+                'whisper-large-v3-turbo': 'llama-3.1-8b-instant'
+            };
+            return maps[m] || m;
+        };
+
         // --- State Management ---
         const state = {
             lang: 'ar',
@@ -1749,6 +1793,7 @@
             isProcessing: false,
             // Library & Theme
             enableWebSearch: false, // New: toggle for web search
+            thinkingMode: 'standard',
             theme: 'dark',
             themeColor: '0, 243, 255',
             library: { 
@@ -2162,6 +2207,7 @@
             apiKeyInput: document.getElementById('apiKeyInput'),
             groqApiKeyInput: document.getElementById('groqApiKeyInput'),
             modelSelect: document.getElementById('modelSelect'),
+            thinkingModeSelect: document.getElementById('thinkingModeSelect'),
             langToggleBtn: document.getElementById('langToggleBtn'),
             statusDot: document.getElementById('statusDot'),
             statusText: document.getElementById('statusText'),
@@ -2294,7 +2340,8 @@
             userName: document.getElementById('userName'),
             userEmail: document.getElementById('userEmail'),
             syncStatus: document.getElementById('syncStatus'),
-            logoutBtn: document.getElementById('logoutBtn')
+            logoutBtn: document.getElementById('logoutBtn'),
+            enableWebSearchCheckbox: document.getElementById('enableWebSearchCheckbox')
         };
 
         // --- Initialization ---
@@ -2312,12 +2359,22 @@
 
             const savedKey = localStorage.getItem('iRepair_API_Key');
             if (savedKey) {
-                try { state.apiKey = atob(savedKey); D.apiKeyInput.value = state.apiKey; } catch(e){}
+                try { 
+                    state.apiKey = atob(savedKey); 
+                } catch(e){
+                    state.apiKey = savedKey;
+                }
+                D.apiKeyInput.value = state.apiKey;
             }
 
             const savedGroqKey = localStorage.getItem('iRepair_Groq_API_Key');
             if (savedGroqKey) {
-                try { state.groqApiKey = atob(savedGroqKey); D.groqApiKeyInput.value = state.groqApiKey; } catch(e){}
+                try { 
+                    state.groqApiKey = atob(savedGroqKey); 
+                } catch(e){
+                    state.groqApiKey = savedGroqKey;
+                }
+                D.groqApiKeyInput.value = state.groqApiKey;
             }
 
             const savedModel = localStorage.getItem('iRepair_Model');
@@ -2329,6 +2386,12 @@
             const savedLogo = localStorage.getItem('iRepair_Logo');
             if (savedLogo) { state.customLogo = savedLogo; }
 
+            // Load Web Search preference
+            const savedWebSearch = localStorage.getItem('iRepair_EnableWebSearch');
+            if (savedWebSearch !== null) { state.enableWebSearch = savedWebSearch === 'true'; }
+
+            const savedThinkingMode = localStorage.getItem('iRepair_ThinkingMode');
+            if (savedThinkingMode) { state.thinkingMode = savedThinkingMode; }
 
 
             // Restore Cloud State
@@ -2417,24 +2480,40 @@
             
             const modelLabels = {
                 ar: {
-                    'gemini-2.5-flash': "Gemini 2.5 Flash (سريع)",
-                    'gemini-2.5-pro': "Gemini 2.5 Pro",
-                    'gemini-2.5-flash-image': "Gemini 2.5 Flash Image",
-                    'gemini-2.5-flash-live': "Gemini 2.5 Flash Live",
-                    'gemini-3.1-pro-preview': "Gemini 3.1 Pro (تحليل عميق)",
+                    'gemini-2.0-flash': "Gemini 2.0 Flash (سريع ومتوازن)",
+                    'gemini-2.0-flash-lite-preview-02-05': "Gemini 2.0 Flash-Lite",
+                    'gemini-3.0-flash-preview': "Gemini 3 Flash (Preview)",
                     'gemini-3.1-flash-lite-preview': "Gemini 3.1 Flash-Lite",
-                    'llama-3.3-70b-versatile': "Groq: Llama 3.3 (قوي)",
-                    'llama-3.1-8b-instant': "Groq: Llama Instant (سريع)"
+                    'gemini-2.5-flash': "Gemini 2.5 Flash",
+                    'gemini-2.5-flash-lite-preview': "Gemini 2.5 Flash-Lite",
+                    'llama-4-scout': "Llama 4 Scout",
+                    'llama-3.3-70b-versatile': "Llama 3.3 70B (Versatile)",
+                    'llama-3.1-8b-instant': "Llama 3.1 8B (Instant)",
+                    'gpt-oss-120b': "GPT-OSS 120B",
+                    'gpt-oss-20b': "GPT-OSS 20B",
+                    'deepseek-r1-distill-70b': "DeepSeek-R1 (Distill 70B)",
+                    'qwen-3-32b': "Qwen 3 32B",
+                    'kimi-k2': "Kimi K2",
+                    'whisper-large-v3': "Whisper Large v3",
+                    'whisper-large-v3-turbo': "Whisper Large v3 Turbo"
                 },
                 en: {
-                    'gemini-2.5-flash': "Gemini 2.5 Flash (Fast)",
-                    'gemini-2.5-pro': "Gemini 2.5 Pro",
-                    'gemini-2.5-flash-image': "Gemini 2.5 Flash Image",
-                    'gemini-2.5-flash-live': "Gemini 2.5 Flash Live",
-                    'gemini-3.1-pro-preview': "Gemini 3.1 Pro (Deep Analysis)",
+                    'gemini-2.0-flash': "Gemini 2.0 Flash (Fast & Balanced)",
+                    'gemini-2.0-flash-lite-preview-02-05': "Gemini 2.0 Flash-Lite",
+                    'gemini-3.0-flash-preview': "Gemini 3 Flash (Preview)",
                     'gemini-3.1-flash-lite-preview': "Gemini 3.1 Flash-Lite",
-                    'llama-3.3-70b-versatile': "Groq: Llama 3.3 (Versatile)",
-                    'llama-3.1-8b-instant': "Groq: Llama Instant (Fast)"
+                    'gemini-2.5-flash': "Gemini 2.5 Flash",
+                    'gemini-2.5-flash-lite-preview': "Gemini 2.5 Flash-Lite",
+                    'llama-4-scout': "Llama 4 Scout",
+                    'llama-3.3-70b-versatile': "Llama 3.3 70B (Versatile)",
+                    'llama-3.1-8b-instant': "Llama 3.1 8B (Instant)",
+                    'gpt-oss-120b': "GPT-OSS 120B",
+                    'gpt-oss-20b': "GPT-OSS 20B",
+                    'deepseek-r1-distill-70b': "DeepSeek-R1 (Distill 70B)",
+                    'qwen-3-32b': "Qwen 3 32B",
+                    'kimi-k2': "Kimi K2",
+                    'whisper-large-v3': "Whisper Large v3",
+                    'whisper-large-v3-turbo': "Whisper Large v3 Turbo"
                 }
             };
 
@@ -2511,7 +2590,7 @@
 
             // Update Status Indicator
             const currentModel = D.modelSelect.value;
-            const isGroq = currentModel.includes('llama') || currentModel.includes('deepseek');
+            const isGroq = !currentModel.includes('gemini');
             const hasKey = isGroq ? !!state.groqApiKey : !!state.apiKey;
 
             if (hasKey) {
@@ -2650,15 +2729,35 @@
 
             D.saveSettingsBtn.addEventListener('click', () => {
                 state.apiKey = D.apiKeyInput.value.trim();
-                if(state.apiKey) localStorage.setItem('iRepair_API_Key', btoa(state.apiKey));
+                if(state.apiKey) {
+                    localStorage.setItem('iRepair_API_Key', btoa(state.apiKey));
+                } else {
+                    localStorage.removeItem('iRepair_API_Key');
+                }
                 state.groqApiKey = D.groqApiKeyInput.value.trim();
-                if(state.groqApiKey) localStorage.setItem('iRepair_Groq_API_Key', btoa(state.groqApiKey));
+                if(state.groqApiKey) {
+                    localStorage.setItem('iRepair_Groq_API_Key', btoa(state.groqApiKey));
+                } else {
+                    localStorage.removeItem('iRepair_Groq_API_Key');
+                }
+                
                 state.model = D.modelSelect.value;
                 localStorage.setItem('iRepair_Model', state.model);
+
+                if (D.thinkingModeSelect) {
+                    state.thinkingMode = D.thinkingModeSelect.value;
+                    localStorage.setItem('iRepair_ThinkingMode', state.thinkingMode);
+                }
                 
                 state.shopName = D.shopNameInput.value.trim();
                 localStorage.setItem('iRepair_ShopName', state.shopName);
                 if(D.printShopName) D.printShopName.textContent = state.shopName;
+
+                // Save web search preference
+                if (D.enableWebSearchCheckbox) {
+                    state.enableWebSearch = D.enableWebSearchCheckbox.checked;
+                    localStorage.setItem('iRepair_EnableWebSearch', state.enableWebSearch);
+                }
 
                 // Success Feedback
                 const orig = D.saveSettingsBtn.innerHTML;
@@ -2748,6 +2847,7 @@
             D.apiKeyInput.value = state.apiKey;
             D.groqApiKeyInput.value = state.groqApiKey;
             D.modelSelect.value = state.model;
+            if (D.thinkingModeSelect) D.thinkingModeSelect.value = state.thinkingMode || 'standard';
             D.shopNameInput.value = state.shopName || "iRepair AI";
             // Set web search toggle
             if (D.enableWebSearchCheckbox) D.enableWebSearchCheckbox.checked = state.enableWebSearch;
@@ -3016,9 +3116,11 @@
 
             try {
                 const currentModel = D.modelSelect.value;
-                const isGroq = currentModel.includes('llama');
+                const isGroq = !currentModel.includes('gemini');
+                const apiModel = getMappedModel(currentModel);
                 let aiText = "";
                 let aiMessageObj = null;
+                let geminiGroundingData = null;
 
                 if (isGroq) {
                     if (!state.groqApiKey) { showError('err_no_key'); throw new Error('STOP'); }
@@ -3039,7 +3141,7 @@
                         method: 'POST',
                         headers: { 'Authorization': `Bearer ${state.groqApiKey.trim()}`, 'Content-Type': 'application/json' },
                         body: JSON.stringify({ 
-                            model: currentModel, 
+                            model: apiModel, 
                             messages: groqMessages,
                             temperature: 0.1,
                             max_tokens: 4096
@@ -3053,6 +3155,12 @@
                 } else {
                     // Gemini Logic
                     if (!state.apiKey) { showError('err_no_key'); throw new Error('STOP'); }
+                    
+                    let finalModel = apiModel;
+                    if (state.thinkingMode === 'deep' && finalModel.includes('gemini')) {
+                        finalModel = 'gemini-2.0-flash-thinking-exp-01-21';
+                    }
+
                     const requestBody = {
                         systemInstruction: { parts: [{ text: getSystemInstruction() }] },
                         contents: [...state.history, userMessageObj],
@@ -3063,10 +3171,10 @@
                             topK: 40
                         },
                         // Enable web search if user opted in
-                        ...(state.enableWebSearch ? { tools: [{ google_search: {} }] } : {})
+                        ...(state.enableWebSearch ? { tools: [{ googleSearch: {} }] } : {})
                     };
 
-                    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${currentModel}:generateContent?key=${state.apiKey}`, {
+                    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${finalModel}:generateContent?key=${state.apiKey}`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(requestBody)
@@ -3075,48 +3183,47 @@
                     const data = await response.json();
                     if (!response.ok) throw new Error(data.error?.message || 'Gemini Error');
                     if (data.candidates && data.candidates[0].content) {
-                        aiText = data.candidates[0].content.parts[0].text;
+                        // Collect all text parts (Gemini may split across multiple parts)
+                        const allParts = data.candidates[0].content.parts || [];
+                        aiText = allParts.filter(p => p.text).map(p => p.text).join('');
                         aiMessageObj = { role: "model", parts: [{ text: aiText }] };
                     }
+                    // Extract grounding metadata (search sources) if present
+                    geminiGroundingData = (data.candidates && data.candidates[0].groundingMetadata) || null;
                 }
 
                 if (aiText) {
                     appendMessage('ai', aiText);
-                    // Render any tool (web‑search) results returned by Gemini
-                    if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts) {
-                        const parts = data.candidates[0].content.parts;
-                        // Look for a part that contains a tool response (Google search)
-                        const toolPart = parts.find(p => p.toolResponse);
-                        if (toolPart && toolPart.toolResponse && toolPart.toolResponse.searchResults) {
-                            const results = toolPart.toolResponse.searchResults;
-                            // Create a container for the results
-                            const resultContainer = document.createElement('div');
-                            resultContainer.className = 'mt-4 space-y-3';
-                            results.forEach(r => {
-                                const card = document.createElement('div');
-                                card.className = 'glass-panel p-3 rounded-xl border border-cyber/30 hover:border-cyber/60 transition';
-                                const title = r.title || r.displayLink || r.url;
-                                const snippet = r.snippet || '';
-                                const url = r.url || '#';
-                                card.innerHTML = `
-                                    <div class="flex items-center space-x-2 mb-1">
-                                        <i class="fa-solid fa-magnifying-glass text-cyber"></i>
-                                        <a href="${url}" target="_blank" class="text-sm font-bold text-cyber underline">${title}</a>
-                                    </div>
-                                    <p class="text-xs text-gray-300">${snippet}</p>
-                                `;
-                                resultContainer.appendChild(card);
+
+                    // Render grounding sources (Google Search results) if present
+                    if (geminiGroundingData) {
+                        const chunks = geminiGroundingData.groundingChunks || [];
+                        const supports = geminiGroundingData.groundingSupports || [];
+                        const webChunks = chunks.filter(c => c.web && c.web.uri);
+                        if (webChunks.length > 0) {
+                            const sourcesDiv = document.createElement('div');
+                            sourcesDiv.className = 'mt-3 pt-3 border-t border-white/10';
+                            sourcesDiv.innerHTML = `<div class="flex items-center gap-2 text-xs text-gray-400 mb-2"><i class="fa-solid fa-globe text-cyber"></i><span>المصادر (تم التحقق عبر البحث)</span></div>`;
+                            const linksDiv = document.createElement('div');
+                            linksDiv.className = 'flex flex-wrap gap-2';
+                            webChunks.forEach(chunk => {
+                                const uri = chunk.web.uri;
+                                const title = chunk.web.title || new URL(uri).hostname;
+                                const link = document.createElement('a');
+                                link.href = uri;
+                                link.target = '_blank';
+                                link.rel = 'noopener noreferrer';
+                                link.className = 'flex items-center gap-1 px-2 py-1 rounded-lg bg-cyber/10 border border-cyber/30 text-cyber text-xs hover:bg-cyber/20 transition truncate max-w-[200px]';
+                                link.innerHTML = `<i class="fa-solid fa-link text-[10px]"></i><span class="truncate">${title}</span>`;
+                                linksDiv.appendChild(link);
                             });
-                            // Insert after the last AI message in the chat container
-                            const lastAiMsg = document.querySelector('#chatContainer .message.ai:last-child');
-                            if (lastAiMsg) {
-                                lastAiMsg.parentNode.insertBefore(resultContainer, lastAiMsg.nextSibling);
-                            } else {
-                                D.chatContainer.appendChild(resultContainer);
-                            }
+                            sourcesDiv.appendChild(linksDiv);
+                            // Append inside the last AI bubble
+                            const lastBubble = D.chatContainer.querySelector('.msg-bubble.msg-ai:last-child');
+                            if (lastBubble) lastBubble.appendChild(sourcesDiv);
                         }
                     }
-                    updateContextWindow(userMessageObj, aiMessageObj);
+
                     updateContextWindow(userMessageObj, aiMessageObj);
 
                     // Auto-Save Chat Logic
@@ -3136,7 +3243,7 @@
             } catch (err) {
                 if (err.message !== 'STOP') {
                     console.error(err);
-                    showError('err_generic');
+                    showError(err.message || 'err_generic');
                 }
             } finally {
                 state.isProcessing = false;
@@ -4107,7 +4214,8 @@
 4. إذا كانت المعطيات غير كافية للتشخيص النهائي، اطلب صراحة قياسات إضافية.
 الرد يكون بلغة مهندسين صيانة الهواتف والحواسيب، ومنسق بشكل ممتاز (Markdown). استخدم أيقونات متناسبة.`;
                     const currentModel = document.getElementById('modelSelect').value;
-                    const isGroq = currentModel.includes('llama');
+                    const isGroq = !currentModel.includes('gemini');
+                    const apiModel = getMappedModel(currentModel);
                     let aiText = "";
 
                     if (isGroq) {
@@ -4115,7 +4223,7 @@
                             method: 'POST',
                             headers: { 'Authorization': `Bearer ${state.groqApiKey.trim()}`, 'Content-Type': 'application/json' },
                             body: JSON.stringify({ 
-                                model: currentModel, 
+                                model: apiModel, 
                                 messages: [{role: 'system', content: getPowerSystemInstruction()}, {role: 'user', content: prompt}],
                                 temperature: 0.2
                             })
@@ -4124,13 +4232,19 @@
                         if (!response.ok) throw new Error(data.error?.message || 'Groq Error');
                         aiText = data.choices[0].message.content;
                     } else {
-                        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${currentModel}:generateContent?key=${state.apiKey}`, {
+                        let finalModel = apiModel;
+                        if (state.thinkingMode === 'deep' && finalModel.includes('gemini')) {
+                            finalModel = 'gemini-2.0-flash-thinking-exp-01-21';
+                        }
+                        const requestBody = {
+                            systemInstruction: { parts: [{ text: getPowerSystemInstruction() }] },
+                            contents: [{role: "user", parts: [{text: prompt}]}]
+                        };
+
+                        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${finalModel}:generateContent?key=${state.apiKey}`, {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                                systemInstruction: { parts: [{ text: getPowerSystemInstruction() }] },
-                                contents: [{role: "user", parts: [{text: prompt}]}]
-                            })
+                            body: JSON.stringify(requestBody)
                         });
                         const data = await response.json();
                         if (!response.ok) throw new Error(data.error?.message || 'Gemini Error');
@@ -4165,7 +4279,8 @@
  
                 try {
                     const currentModel = document.getElementById('modelSelect').value;
-                    const isGroq = currentModel.includes('llama');
+                    const isGroq = !currentModel.includes('gemini');
+                    const apiModel = getMappedModel(currentModel);
                     let aiText = "";
  
                     if (isGroq) {
@@ -4176,20 +4291,26 @@
                         const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
                             method: 'POST',
                             headers: { 'Authorization': `Bearer ${state.groqApiKey.trim()}`, 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ model: currentModel, messages: groqMessages, temperature: 0.2 })
+                            body: JSON.stringify({ model: apiModel, messages: groqMessages, temperature: 0.2 })
                         });
                         const data = await response.json();
                         if (!response.ok) throw new Error(data.error?.message || 'Groq Error');
                         aiText = data.choices[0].message.content;
                     } else {
+                        let finalModel = apiModel;
+                        if (state.thinkingMode === 'deep' && finalModel.includes('gemini')) {
+                            finalModel = 'gemini-2.0-flash-thinking-exp-01-21';
+                        }
                         const geminiHistory = powerAiHistory.filter(m => m.role !== 'system');
-                        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${currentModel}:generateContent?key=${state.apiKey}`, {
+                        const requestBody = {
+                            systemInstruction: { parts: [{ text: getPowerSystemInstruction() }] },
+                            contents: geminiHistory
+                        };
+
+                        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${finalModel}:generateContent?key=${state.apiKey}`, {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                                systemInstruction: { parts: [{ text: getPowerSystemInstruction() }] },
-                                contents: geminiHistory
-                            })
+                            body: JSON.stringify(requestBody)
                         });
                         const data = await response.json();
                         if (!response.ok) throw new Error(data.error?.message || 'Gemini Error');
